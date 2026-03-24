@@ -1,0 +1,19 @@
+[project]
+name = "sion908-blog"
+version = "0.1.0"
+description = "Sion908's technical blog"
+readme = "README.md"
+authors = [{ name = "Sion908", email = "sionn908@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "sphinx>=8.0.2",
+    "ablog>=0.11.0",
+    "sphinx-design>=0.6.1",
+    "sphinxemoji>=0.3.1",
+    "sphinxext-opengraph>=0.9.1",
+    "sphinx-nekochan>=0.4.0",
+    "pymdown-extensions>=10.0",
+]
+
+[tool.uv]
+package = false
