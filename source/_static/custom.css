@@ -336,3 +336,123 @@ h1, h2, h3, h4 {
 @media (max-width: 480px) {
     .services-grid { grid-template-columns: 1fr; }
 }
+
+/* =========================================
+   Dark Mode Premium Refinements
+   ========================================= */
+
+/* 1. Scrollbars - Glassmorphism Adapted */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+/* 2. Text Selection */
+::selection {
+    background: var(--primary-color);
+    color: #ffffff;
+}
+::-moz-selection {
+    background: var(--primary-color);
+    color: #ffffff;
+}
+
+/* 3. Sphinx Default Overrides (Glassmorphism Integration) */
+.admonition, .warning, .note {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-speed) ease;
+}
+.admonition-title {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.8rem !important;
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+/* 4. Tables */
+table.docutils {
+    width: 100%;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    margin-bottom: 2rem;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border) !important;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-speed) ease;
+}
+table.docutils th {
+    background: var(--primary-light) !important;
+    color: var(--primary-color) !important;
+    font-weight: 600;
+    padding: 12px 15px;
+    border-bottom: 2px solid var(--glass-border) !important;
+    text-align: left;
+}
+table.docutils td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--glass-border) !important;
+    color: var(--text-primary);
+}
+table.docutils tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* 5. Code Blocks & Syntax Highlighting (Dark Theme Override) */
+[data-theme='dark'] div.highlight {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+[data-theme='dark'] div.highlight pre, 
+[data-theme='dark'] pre.literal-block {
+    background: transparent !important;
+    color: #e2e8f0 !important;
+}
+/* Adjust Pygments Tokens for Readability on Dark Background */
+[data-theme='dark'] .highlight .k, [data-theme='dark'] .highlight .kc, [data-theme='dark'] .highlight .kd, [data-theme='dark'] .highlight .kn, [data-theme='dark'] .highlight .kp, [data-theme='dark'] .highlight .kr {
+    color: #c678dd !important; /* Purple */
+}
+[data-theme='dark'] .highlight .s, [data-theme='dark'] .highlight .s2, [data-theme='dark'] .highlight .sa, [data-theme='dark'] .highlight .sb, [data-theme='dark'] .highlight .sc, [data-theme='dark'] .highlight .dl, [data-theme='dark'] .highlight .sd, [data-theme='dark'] .highlight .s1 {
+    color: #98c379 !important; /* Green */
+}
+[data-theme='dark'] .highlight .nc, [data-theme='dark'] .highlight .nf, [data-theme='dark'] .highlight .nx {
+    color: #61afef !important; /* Blue */
+}
+[data-theme='dark'] .highlight .c, [data-theme='dark'] .highlight .c1, [data-theme='dark'] .highlight .cm, [data-theme='dark'] .highlight .ch {
+    color: #7f848e !important; /* Gray */
+}
+[data-theme='dark'] .highlight .o, [data-theme='dark'] .highlight .ow {
+    color: #56b6c2 !important; /* Cyan */
+}
+[data-theme='dark'] .highlight .nd {
+    color: #e5c07b !important; /* Yellow */
+}
+[data-theme='dark'] .highlight .m, [data-theme='dark'] .highlight .mf, [data-theme='dark'] .highlight .mh, [data-theme='dark'] .highlight .mi, [data-theme='dark'] .highlight .mo {
+    color: #d19a66 !important; /* Orange/Numbers */
+}
