@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2025/ai-pair-programming-htmx.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="はじめに：開発革命の実体験:### 衝撃の30分間 「AWSでゲームを作りたい」と入力してから、完全に動作するタイミングベースクリッカーゲームが完成するまで、わずか30分。これは誇張ではなく、実際に体験した開発速度です。### 従来開発との比較 従来の個人開発: 企画(1日) → 技術調査(2日) → 環境構築(半日) → 実装(1週間) → デバッグ(2日) → デプロイ(半日) 合計: ..." />
+<meta name="description" content="はじめに：開発革命の実体験:### 衝撃の30分間 「AWSでゲームを作りたい」と入力してから、完全に動作するタイミングベースクリッカーゲームが完成するまで、わずか30分。これは誇張ではなく、実際に体験した開発速度です。### 従来開発との比較 従来の個人開発: 企画(1日) → 技術調査(2日) → 環境構築(半日) → 実装(1週間) → デバッグ(2日) → デプロイ(半日) 合計: ..." />
+
+    <title>AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録 &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="ai-lambda-htmx-30">
+<h1>AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録<a class="headerlink" href="#ai-lambda-htmx-30" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>はじめに：開発革命の実体験<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>### 衝撃の30分間</p>
+<p>「AWSでゲームを作りたい」と入力してから、完全に動作するタイミングベースクリッカーゲームが完成するまで、わずか30分。これは誇張ではなく、実際に体験した開発速度です。</p>
+<p>### 従来開発との比較</p>
+<p>従来の個人開発:
+企画(1日) → 技術調査(2日) → 環境構築(半日) → 実装(1週間) → デバッグ(2日) → デプロイ(半日)
+合計: 約2週間</p>
+<p>AI支援開発:
+企画・実装・デプロイ: 30分</p>
+<p>この圧倒的な差は何から生まれるのか？実際の開発プロセスを詳細に記録しました。</p>
+</section>
+<section id="ai">
+<h2>AI支援開発の実際：対話ログから見る開発プロセス<a class="headerlink" href="#ai" title="Link to this heading">¶</a></h2>
+<p>### Phase 1: 技術スタック選定（5分）</p>
+<p><strong>私</strong>: 「awsに置くことを念頭に置いたゲームを作りたい」</p>
+<p><strong>AI</strong>: 即座に複数の選択肢を提示
+- Webブラウザゲーム（S3 + CloudFront + Lambda）
+- リアルタイム対戦（GameLift + WebSocket）
+- モバイルゲーム（Amplify + Cognito）</p>
+<p><strong>私</strong>: 「lambda+jinja2+htmxである」</p>
+<p><strong>AI</strong>: 瞬時に最適化された構成を提案</p>
+<p>Lambda Function URLs + Jinja2 + HTMX
+↓
+サーバーレス + テンプレート + ハイパーメディア
+= 最小構成で最大効果</p>
+<p>### Phase 2: 基本実装（10分）</p>
+<p>AIが生成した初期コードの品質に驚愕：
+- Litestarの適切な使用法
+- Jinja2テンプレートのインライン実装
+- HTMXの効果的な活用
+- エラーハンドリングまで完備</p>
+<p>### Phase 3: 機能拡張（10分）</p>
+<p><strong>私</strong>: 「litestarも使って欲しい」
+→ 即座にMangumを使ったLambda統合</p>
+<p><strong>私</strong>: 「localStorageに保存するようにして欲しい」
+→ クライアント・サーバー間の状態同期システムを実装</p>
+<p>### Phase 4: UX改善（5分）</p>
+<p><strong>私</strong>: 「htmxの機能を何か使いたい」
+→ プログレスバー、アニメーション、リアルタイム更新を提案・実装</p>
+</section>
+<section id="lambda-htmx-web">
+<h2>Lambda + HTMX: 新時代のWeb開発パラダイム<a class="headerlink" href="#lambda-htmx-web" title="Link to this heading">¶</a></h2>
+<p>### 従来のSPA開発の課題</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// React/Vueの典型的な複雑さ</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">gameState</span><span class="p">,</span><span class="w"> </span><span class="nx">setGameState</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">({});</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">loading</span><span class="p">,</span><span class="w"> </span><span class="nx">setLoading</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+
+<span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w"> </span><span class="c1">// 複雑な状態管理</span>
+<span class="w"> </span><span class="c1">// API呼び出し</span>
+<span class="w"> </span><span class="c1">// エラーハンドリング</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">dependencies</span><span class="p">]);</span>
+
+<span class="c1">// ビルド設定、バンドル最適化、デプロイ設定...</span>
+</pre></div>
+</div>
+<p>### HTMX + Lambdaのシンプルさ</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="cm">&lt;!-- たった1行でリアルタイム更新 --&gt;</span>
+<span class="p">&lt;</span><span class="nt">button</span> <span class="na">hx-post</span><span class="o">=</span><span class="s">&quot;/api/action&quot;</span>
+       <span class="na">hx-target</span><span class="o">=</span><span class="s">&quot;#game-content&quot;</span><span class="p">&gt;</span>
+   Click Me!
+<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>### 技術的優位性の詳細分析</p>
+<p>#### 1. 開発効率
+- <strong>フロントエンド・バックエンド境界の消失</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>HTMLテンプレート内でサーバーロジックを直接呼び出し</p></li>
+<li><p>状態管理の複雑さを排除</p></li>
+<li><p>APIの設計・実装コストを削減</p></li>
+</ul>
+</div></blockquote>
+<p>#### 2. 想定運用コスト</p>
+<p>従来構成の月額コスト:
+• EC2 t3.micro: $8.5
+• RDS t3.micro: $15
+• CloudFront: $1
+• 合計: $24.5/月</p>
+<p>Lambda + HTMX構成:
+• Lambda実行時間: $0.20
+• API Gateway: $1
+• 合計: $1.20/月 (95%削減)</p>
+<p>#### 3. パフォーマンス
+- <strong>初期ロード</strong>: HTMLテンプレート直接配信
+- <strong>更新処理</strong>: 必要な部分のみDOM更新
+- <strong>ネットワーク</strong>: JSONではなくHTML断片で通信効率化</p>
+</section>
+<section id="id2">
+<h2>実装の技術的深掘り<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>### HTMXの真の威力</p>
+<p>#### 1. 宣言的UI更新</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="cm">&lt;!-- 従来のJavaScript --&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="nx">fetch</span><span class="p">(</span><span class="s1">&#39;/api/action&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;POST&#39;</span><span class="p">})</span>
+<span class="w"> </span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<span class="w"> </span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;score&#39;</span><span class="p">).</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">score</span><span class="p">;</span>
+<span class="w">   </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;level&#39;</span><span class="p">).</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">level</span><span class="p">;</span>
+<span class="w">   </span><span class="c1">// 複雑なDOM操作...</span>
+<span class="w"> </span><span class="p">});</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+
+<span class="cm">&lt;!-- HTMXの宣言的アプローチ --&gt;</span>
+<span class="p">&lt;</span><span class="nt">button</span> <span class="na">hx-post</span><span class="o">=</span><span class="s">&quot;/api/action&quot;</span>
+       <span class="na">hx-target</span><span class="o">=</span><span class="s">&quot;#game-content&quot;</span>
+       <span class="na">hx-swap</span><span class="o">=</span><span class="s">&quot;innerHTML&quot;</span><span class="p">&gt;</span>
+   Click Me!
+<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>#### 2. 高度な機能の簡単実装</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="cm">&lt;!-- プログレスインジケーター --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">hx-indicator</span><span class="o">=</span><span class="s">&quot;#loading&quot;</span><span class="p">&gt;</span>Processing...<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+
+<span class="cm">&lt;!-- 条件付きリクエスト --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">hx-get</span><span class="o">=</span><span class="s">&quot;/api/special&quot;</span>
+    <span class="na">hx-trigger</span><span class="o">=</span><span class="s">&quot;load&quot;</span>
+    <span class="na">hx-include</span><span class="o">=</span><span class="s">&quot;[name=&#39;level&#39;]&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+
+<span class="cm">&lt;!-- リアルタイム更新 --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">hx-get</span><span class="o">=</span><span class="s">&quot;/api/status&quot;</span>
+    <span class="na">hx-trigger</span><span class="o">=</span><span class="s">&quot;every 2s&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>### Lambdaでのゲーム状態管理</p>
+<p>#### 1. localStorageとの連携パターン</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_game_data_from_request</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">   </span><span class="sd">&quot;&quot;&quot;HTTPヘッダーからクライアント状態を取得&quot;&quot;&quot;</span>
+   <span class="n">game_data_header</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;X-Game-Data&#39;</span><span class="p">)</span>
+   <span class="k">if</span> <span class="n">game_data_header</span><span class="p">:</span>
+       <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">game_data_header</span><span class="p">)</span>
+   <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;clicks&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_response_with_game_data</span><span class="p">(</span><span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">context</span><span class="p">):</span>
+<span class="w">   </span><span class="sd">&quot;&quot;&quot;更新された状態をヘッダーで返却&quot;&quot;&quot;</span>
+   <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X-Updated-Game-Data&#39;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">game_data</span><span class="p">)}</span>
+   <span class="k">return</span> <span class="n">LitestarResponse</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">html</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>#### 2. タイミングシステムの実装</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">function</span><span class="w"> </span><span class="nx">attemptItemGet</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="c1">// リアルタイム位置計算</span>
+<span class="w">   </span><span class="kd">const</span><span class="w"> </span><span class="nx">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">calculateIndicatorPosition</span><span class="p">(</span><span class="nx">event</span><span class="p">);</span>
+
+<span class="w">   </span><span class="c1">// タイミング品質判定</span>
+<span class="w">   </span><span class="kd">const</span><span class="w"> </span><span class="nx">quality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">determineTimingQuality</span><span class="p">(</span><span class="nx">position</span><span class="p">);</span>
+
+<span class="w">   </span><span class="c1">// HTMXでサーバーに送信</span>
+<span class="w">   </span><span class="nx">htmx</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;/api/get-item&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="s1">&#39;X-Timing-Quality&#39;</span><span class="o">:</span><span class="w"> </span><span class="nx">quality</span><span class="p">}</span>
+<span class="w">   </span><span class="p">});</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>AI支援開発の深層分析<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>### AIが優秀だった点</p>
+<p>#### 1. 技術選択の最適化
+- <strong>問題</strong>: 「AWSでゲーム」という曖昧な要求
+- <strong>AI判断</strong>: 用途に応じた複数選択肢の提示
+- <strong>結果</strong>: 最小構成で最大効果の実現</p>
+<p>#### 2. 実装パターンの知識</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># AIが自然に適用したベストプラクティス</span>
+<span class="err">•</span> <span class="n">Mangumを使ったLambda統合</span>
+<span class="err">•</span> <span class="n">Jinja2のStringLoaderパターン</span>
+<span class="err">•</span> <span class="n">HTMXイベントハンドリング</span>
+<span class="err">•</span> <span class="n">エラーハンドリングの網羅</span>
+</pre></div>
+</div>
+<p>#### 3. デバッグ能力</p>
+<p>エラー: ImportError: cannot import name 'FormData'
+AI対応: 即座に不要なインポートを特定・削除</p>
+<p>エラー: AttributeError: 'StringTemplateEngine' object has no attribute 'engine'
+AI対応: テンプレートエンジンの実装方式を変更</p>
+<p>### 人間が重要だった点</p>
+<p>#### 1. 要求の具体化
+- 「プログレスバーを表示し、特定の場所をクリックするとアイテムがもらえるように」
+- 「スコアはlocalStorageに保存するようにして欲しい」</p>
+<p>#### 2. UX判断
+- タイミングゲームの面白さ
+- 視覚効果の豪華さ
+- ユーザビリティの向上</p>
+<p>#### 3. 技術選択の最終判断
+- Lambda + HTMXの組み合わせ採用
+- localStorageでの永続化選択</p>
+</section>
+<section id="id4">
+<h2>開発体験の革新<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p>### 従来の個人開発</p>
+<ol class="arabic simple">
+<li><p>アイデア発想</p></li>
+<li><p>技術調査・学習</p></li>
+<li><p>環境構築</p></li>
+<li><p>設計・実装</p></li>
+<li><p>テスト・デバッグ</p></li>
+<li><p>デプロイ設定</p></li>
+<li><p>運用準備</p></li>
+</ol>
+<p>各段階で挫折リスク</p>
+<p>### AI支援開発</p>
+<ol class="arabic simple">
+<li><p>アイデア発想</p></li>
+<li><p>AIとの対話で即座に実装</p></li>
+<li><p>リアルタイムでの改善・拡張</p></li>
+</ol>
+<p>挫折リスクの大幅削減</p>
+<p>### 学習効果の変化
+- <strong>従来</strong>: 理論学習 → 実践適用
+- <strong>AI支援</strong>: 実践 → 理解深化
+- <strong>結果</strong>: より深い技術理解</p>
+</section>
+<section id="id5">
+<h2>まとめ：開発パラダイムの転換点<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>### AI支援開発の本質
+- <strong>速度</strong>: アイデア→実装の時間短縮
+- <strong>品質</strong>: ベストプラクティスの自動適用
+- <strong>学習</strong>: 実践を通じた深い理解</p>
+<p>### Lambda + HTMX の意義
+- <strong>シンプルさ</strong>: 複雑さを排除した開発体験
+- <strong>効率性</strong>: 最小コストでの最大効果
+- <strong>拡張性</strong>: 必要に応じた機能追加の容易さ</p>
+<p>### 個人開発者への提言
+1. <strong>AIを恐れず活用</strong>: 協働パートナーとしての位置づけ
+2. <strong>技術選択の再考</strong>: 複雑さより実用性を重視
+3. <strong>学習方法の変化</strong>: 理論より実践を先行</p>
+<p>### 最後に</p>
+<p>この30分間の開発体験は、単なる技術的成功以上の意味を持ちます。それは、個人開発者が世界レベルの開発速度と品質を手に入れられる時代の到来を示しています。</p>
+<p>技術の民主化が進む今、重要なのは最新フレームワークの習得ではなく、<a href="#id6"><span class="problematic" id="id7">**</span></a>問題解決能力**と**創造性**です。AIが技術的な実装を支援してくれる今こそ、私たちは本来注力すべき「何を作るか」「なぜ作るか」に集中できるのです。</p>
+</section>
+<section id="id8">
+<h2>参考リンク・リソース<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://htmx.org/">HTMX公式ドキュメント</a></p></li>
+<li><p><a class="reference external" href="https://litestar.dev/">Litestar公式ドキュメント</a></p></li>
+<li><p><a class="reference external" href="https://docs.aws.amazon.com/serverless-application-model/">AWS SAM公式ガイド</a></p></li>
+</ul>
+<p>---</p>
+<p><em>この記事は実際のAI支援開発体験を基に執筆されました。開発時間30分は実測値です。</em></p>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+      Previous:
+    
+    <a href="lambda-async-utility.html">
+      
+      <span>AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+      Next: 
+    <a href="sqlspec-orm.html">
+      <span>PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&CRUD実装</span>
+      
+    </a>
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録</a><ul>
+<li><a class="reference internal" href="#id1">はじめに：開発革命の実体験</a></li>
+<li><a class="reference internal" href="#ai">AI支援開発の実際：対話ログから見る開発プロセス</a></li>
+<li><a class="reference internal" href="#lambda-htmx-web">Lambda + HTMX: 新時代のWeb開発パラダイム</a></li>
+<li><a class="reference internal" href="#id2">実装の技術的深掘り</a></li>
+<li><a class="reference internal" href="#id3">AI支援開発の深層分析</a></li>
+<li><a class="reference internal" href="#id4">開発体験の革新</a></li>
+<li><a class="reference internal" href="#id5">まとめ：開発パラダイムの転換点</a></li>
+<li><a class="reference internal" href="#id8">参考リンク・リソース</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2025/ai-pair-programming-htmx.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>

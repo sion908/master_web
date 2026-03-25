@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&CRUD実装" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2025/sqlspec-orm.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="はじめに - ORMの課題とSQLSpecとの出会い: Webアプリケーション開発において、ORMは便利なツールですが、以下のような課題に直面することがあります： 複雑なクエリが書きにくい- JOINや集計処理が多いと、ORM特有の記法が煩雑に, 生SQLを結局書く- パフォーマンスチューニングで生SQLに戻ることが多い, 学習コストが高い- SQLは知っているのに、ORM特有の記法を覚える..." />
+<meta name="description" content="はじめに - ORMの課題とSQLSpecとの出会い: Webアプリケーション開発において、ORMは便利なツールですが、以下のような課題に直面することがあります： 複雑なクエリが書きにくい- JOINや集計処理が多いと、ORM特有の記法が煩雑に, 生SQLを結局書く- パフォーマンスチューニングで生SQLに戻ることが多い, 学習コストが高い- SQLは知っているのに、ORM特有の記法を覚える..." />
+
+    <title>PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&amp;CRUD実装 &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&amp;CRUD実装</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="pythonormsql-sqlspec-crud">
+<h1>PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&amp;CRUD実装<a class="headerlink" href="#pythonormsql-sqlspec-crud" title="Link to this heading">¶</a></h1>
+<section id="ormsqlspec">
+<h2>はじめに - ORMの課題とSQLSpecとの出会い<a class="headerlink" href="#ormsqlspec" title="Link to this heading">¶</a></h2>
+<p>Webアプリケーション開発において、ORMは便利なツールですが、以下のような課題に直面することがあります：</p>
+<ul class="simple">
+<li><p><strong>複雑なクエリが書きにくい</strong> - JOINや集計処理が多いと、ORM特有の記法が煩雑に</p></li>
+<li><p><strong>生SQLを結局書く</strong> - パフォーマンスチューニングで生SQLに戻ることが多い</p></li>
+<li><p><strong>学習コストが高い</strong> - SQLは知っているのに、ORM特有の記法を覚える必要がある</p></li>
+</ul>
+<p>「SQLをそのまま書きたいけど、型安全性やマイグレーション管理は欲しい」</p>
+<p>そんな中で見つけたのが <strong>SQLSpec</strong> というライブラリです。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p><strong>注意</strong>: SQLSpecは現在実験的なライブラリです。本番環境での使用前に十分な検証を行ってください。</p>
+</div>
+</section>
+<section id="sqlspec">
+<h2>SQLSpecとは<a class="headerlink" href="#sqlspec" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/litestar-org/sqlspec">SQLSpec</a> は、SQL文をそのまま書きながら、以下の機能を提供するライブラリです：</p>
+<ul class="simple">
+<li><p>✅ <strong>Raw SQLをそのまま記述</strong> - 学習コストが低い</p></li>
+<li><p>✅ <strong>型安全な結果マッピング</strong> - Pydanticモデルへの自動変換</p></li>
+<li><p>✅ <strong>マイグレーション管理</strong> - CLIでマイグレーション実行可能</p></li>
+<li><p>✅ <strong>複数DBサポート</strong> - SQLite, PostgreSQL, MySQL等に対応</p></li>
+<li><p>✅ <strong>非同期対応</strong> - aiosqlite, asyncpgなどをサポート</p></li>
+</ul>
+<p>今回は <strong>Litestar</strong> (FastAPI類似のWebフレームワーク) + <strong>SQLite</strong> + <strong>SQLSpec</strong> でTODOアプリのCRUDとマイグレーションを実装してみます。</p>
+</section>
+<section id="id2">
+<h2>サンプルリポジトリ<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>完成したコードはこちら：</p>
+<p><a class="reference external" href="https://github.com/sion908/litestar-sqlspec-app">https://github.com/sion908/litestar-sqlspec-app</a></p>
+</section>
+<section id="id3">
+<h2>プロジェクト構成<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>litestar-sqlspec-app/
+├── app/
+│   ├── __init__.py
+│   ├── main.py           # Litestarアプリのエントリーポイント
+│   ├── db.py             # DB設定
+│   ├── models.py         # Pydanticモデル
+│   ├── routes.py         # APIルート
+│   └── migrations/       # マイグレーションファイル（手動作成）
+│       ├── 20251111125634_init.sql
+│       └── ...
+├── pyproject.toml
+└── README.md
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>セットアップ<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p>### 1. 依存関係のインストール</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+<span class="k">[tool.poetry.dependencies]</span>
+<span class="n">python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^3.12&quot;</span>
+<span class="n">litestar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">extras</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;standard&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;^2.14.0&quot;</span><span class="p">}</span>
+<span class="n">sqlspec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">path</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;sqlspec&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">develop</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="n">extras</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aiosqlite&quot;</span><span class="p">]}</span>
+<span class="n">aiosqlite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^0.20.0&quot;</span>
+<span class="n">pydantic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^2.10.3&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>install
+</pre></div>
+</div>
+<p>### 2. データベース設定</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/db.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec.adapters.aiosqlite</span><span class="w"> </span><span class="kn">import</span> <span class="n">AiosqliteConfig</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_aiosqlite_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AiosqliteConfig</span><span class="p">:</span>
+    <span class="n">db_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;./data/app.db&quot;</span><span class="p">)</span>
+    <span class="n">db_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">AiosqliteConfig</span><span class="p">(</span>
+        <span class="n">pool_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_path</span><span class="p">)},</span>
+        <span class="n">migration_config</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;script_location&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;migrations&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;version_table_name&quot;</span><span class="p">:</span> <span class="s2">&quot;sqlspec_version&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>### 3. Pydanticモデル定義</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/models.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">ConfigDict</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Priority</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="n">LOW</span> <span class="o">=</span> <span class="s2">&quot;low&quot;</span>
+    <span class="n">MEDIUM</span> <span class="o">=</span> <span class="s2">&quot;medium&quot;</span>
+    <span class="n">HIGH</span> <span class="o">=</span> <span class="s2">&quot;high&quot;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskBase</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">completed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">priority</span><span class="p">:</span> <span class="n">Priority</span> <span class="o">=</span> <span class="n">Priority</span><span class="o">.</span><span class="n">MEDIUM</span>
+    <span class="n">due_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskCreate</span><span class="p">(</span><span class="n">TaskBase</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskUpdate</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">completed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">priority</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Priority</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">due_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Task</span><span class="p">(</span><span class="n">TaskBase</span><span class="p">):</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">from_attributes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">updated_at</span><span class="p">:</span> <span class="n">datetime</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>マイグレーション管理<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>### マイグレーションファイルの作成</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p><strong>重要</strong>: SQLSpecではマイグレーションファイルは**自動生成されません**。手動でSQLファイルを作成する必要があります。</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.tomlに設定を記述</span>
+<span class="o">[</span>tool.sqlspec<span class="o">]</span>
+<span class="nv">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.db.get_aiosqlite_config&quot;</span>
+
+<span class="c1"># マイグレーション用のディレクトリとファイルを手動作成</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>app/migrations
+touch<span class="w"> </span>app/migrations/20251111125634_init.sql
+</pre></div>
+</div>
+<p>マイグレーションファイルの構造：</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="c1">-- app/migrations/20251111125634_init.sql</span>
+
+<span class="c1">-- name: migrate-20251111125634-up</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">tasks</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">INTEGER</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="n">AUTOINCREMENT</span><span class="p">,</span>
+<span class="w">    </span><span class="n">title</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">description</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+<span class="w">    </span><span class="n">completed</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">priority</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;medium&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">due_date</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="p">,</span>
+<span class="w">    </span><span class="n">created_at</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="p">,</span>
+<span class="w">    </span><span class="n">updated_at</span><span class="w"> </span><span class="k">TIMESTAMP</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span>
+<span class="p">);</span>
+
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TRIGGER</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">update_tasks_updated_at</span>
+<span class="k">AFTER</span><span class="w"> </span><span class="k">UPDATE</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">tasks</span>
+<span class="k">FOR</span><span class="w"> </span><span class="k">EACH</span><span class="w"> </span><span class="k">ROW</span>
+<span class="k">BEGIN</span>
+<span class="w">    </span><span class="k">UPDATE</span><span class="w"> </span><span class="n">tasks</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">updated_at</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">NEW</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+<span class="k">END</span><span class="p">;</span>
+
+<span class="c1">-- name: migrate-20251111125634-down</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TRIGGER</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">update_tasks_updated_at</span><span class="p">;</span>
+<span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">tasks</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>### マイグレーションの実行</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 最新バージョンまで適用</span>
+sqlspec<span class="w"> </span>upgrade
+
+<span class="c1"># 1つ戻す</span>
+sqlspec<span class="w"> </span>downgrade<span class="w"> </span>-1
+
+<span class="c1"># 特定バージョンまで適用</span>
+sqlspec<span class="w"> </span>upgrade<span class="w"> </span><span class="m">20251111125634</span>
+
+<span class="c1"># 現在のバージョン確認</span>
+sqlspec<span class="w"> </span>current
+</pre></div>
+</div>
+</section>
+<section id="crud">
+<h2>CRUD実装<a class="headerlink" href="#crud" title="Link to this heading">¶</a></h2>
+<p>### Litestarアプリケーションのセットアップ</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/main.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">litestar</span><span class="w"> </span><span class="kn">import</span> <span class="n">Litestar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLSpec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec.extensions.litestar</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLSpecPlugin</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">app.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_aiosqlite_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">app.routes</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskController</span>
+
+<span class="c1"># SQLSpec設定を登録</span>
+<span class="n">sqlspec_registry</span> <span class="o">=</span> <span class="n">SQLSpec</span><span class="p">()</span>
+<span class="n">sqlspec_registry</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span><span class="n">get_aiosqlite_config</span><span class="p">())</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Litestar</span><span class="p">(</span>
+    <span class="n">route_handlers</span><span class="o">=</span><span class="p">[</span><span class="n">TaskController</span><span class="p">],</span>
+    <span class="n">plugins</span><span class="o">=</span><span class="p">[</span><span class="n">SQLSpecPlugin</span><span class="p">(</span><span class="n">sqlspec_registry</span><span class="o">=</span><span class="n">sqlspec_registry</span><span class="p">)],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>### CRUD エンドポイント実装</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/routes.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">litestar</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span><span class="p">,</span> <span class="n">get</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">put</span><span class="p">,</span> <span class="n">delete</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">litestar.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotFoundException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec.adapters.aiosqlite</span><span class="w"> </span><span class="kn">import</span> <span class="n">AiosqliteDriver</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">TaskCreate</span><span class="p">,</span> <span class="n">TaskUpdate</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;/tasks&quot;</span>
+
+    <span class="nd">@get</span><span class="p">()</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_tasks</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">db_session</span><span class="p">:</span> <span class="s2">&quot;AiosqliteDriver&quot;</span><span class="p">,</span>
+        <span class="n">completed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Task</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;タスク一覧取得（フィルタ・ページネーション対応）&quot;&quot;&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            SELECT id, title, description, completed, priority,</span>
+<span class="s2">                   due_date, created_at, updated_at</span>
+<span class="s2">            FROM tasks</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">completed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; WHERE completed = ?&quot;</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">completed</span><span class="p">)</span>
+
+        <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; ORDER BY created_at DESC LIMIT ? OFFSET ?&quot;</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">limit</span><span class="p">,</span> <span class="n">offset</span><span class="p">])</span>
+
+        <span class="c1"># パラメータは *params で展開して渡す</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">)</span>
+        <span class="c1"># schema_typeはexecuteではなく、結果オブジェクトのメソッドで指定</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+
+    <span class="nd">@post</span><span class="p">()</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">TaskCreate</span><span class="p">,</span>
+        <span class="n">db_session</span><span class="p">:</span> <span class="s2">&quot;AiosqliteDriver&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Task</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;タスク作成&quot;&quot;&quot;</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            INSERT INTO tasks (title, description, completed, priority, due_date)</span>
+<span class="sd">            VALUES (?, ?, ?, ?, ?)</span>
+<span class="sd">            RETURNING id, title, description, completed, priority,</span>
+<span class="sd">                      due_date, created_at, updated_at</span>
+<span class="sd">            &quot;&quot;&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">completed</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">due_date</span><span class="p">,</span>
+            <span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span>
+        <span class="p">)</span>
+        <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">task</span>
+
+    <span class="nd">@get</span><span class="p">(</span><span class="s2">&quot;/{task_id:int}&quot;</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">db_session</span><span class="p">:</span> <span class="s2">&quot;AiosqliteDriver&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Task</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;タスク詳細取得&quot;&quot;&quot;</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">select_one_or_none</span><span class="p">(</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            SELECT id, title, description, completed, priority,</span>
+<span class="sd">                   due_date, created_at, updated_at</span>
+<span class="sd">            FROM tasks</span>
+<span class="sd">            WHERE id = ?</span>
+<span class="sd">            &quot;&quot;&quot;</span><span class="p">,</span>
+            <span class="n">task_id</span><span class="p">,</span>
+            <span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">task</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task with ID </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">task</span>
+
+    <span class="nd">@put</span><span class="p">(</span><span class="s2">&quot;/{task_id:int}&quot;</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">TaskUpdate</span><span class="p">,</span>
+        <span class="n">db_session</span><span class="p">:</span> <span class="s2">&quot;AiosqliteDriver&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Task</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;タスク更新（部分更新対応）&quot;&quot;&quot;</span>
+        <span class="n">update_fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">update_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;title = ?&quot;</span><span class="p">)</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">update_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;description = ?&quot;</span><span class="p">)</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">completed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">update_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;completed = ?&quot;</span><span class="p">)</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">completed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">priority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">update_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;priority = ?&quot;</span><span class="p">)</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">due_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">update_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;due_date = ?&quot;</span><span class="p">)</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">due_date</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">update_fields</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">db_session</span><span class="p">)</span>
+
+        <span class="n">update_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;updated_at = CURRENT_TIMESTAMP&quot;</span><span class="p">)</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            UPDATE tasks</span>
+<span class="s2">            SET </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">update_fields</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">            WHERE id = ?</span>
+<span class="s2">            RETURNING id, title, description, completed, priority,</span>
+<span class="s2">                      due_date, created_at, updated_at</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">one</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">task</span>
+
+    <span class="nd">@delete</span><span class="p">(</span><span class="s2">&quot;/{task_id:int}&quot;</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">204</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">db_session</span><span class="p">:</span> <span class="s2">&quot;AiosqliteDriver&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;タスク削除&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;DELETE FROM tasks WHERE id = ?&quot;</span><span class="p">,</span>
+            <span class="n">task_id</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">rows_affected</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFoundException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task with ID </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h2>SQLSpecの特徴的なポイント<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<p>### 1. パラメータの渡し方</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ✅ execute()の場合: *params で展開して渡す</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">)</span>
+<span class="c1"># schema_typeは結果オブジェクトで指定</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+
+<span class="c1"># ✅ select_one()やselect_one_or_none()の場合: schema_typeを直接指定可能</span>
+<span class="n">task</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">select_one</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">,</span> <span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+
+<span class="c1"># 📝 Note: paramsはlistでもtupleでも問題なく動作します</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># または params = (10, 0)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>### 2. 結果の型変換</p>
+<p>SQLSpecは <cite>SQLResult</cite> オブジェクトを返し、以下のメソッドで型変換できます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 全件取得</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+
+<span class="c1"># 1件取得（0件または2件以上の場合はエラー）</span>
+<span class="n">task</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">one</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+
+<span class="c1"># 1件取得（0件の場合はNone）</span>
+<span class="n">task</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+
+<span class="c1"># 最初の1件（0件の場合はNone）</span>
+<span class="n">task</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_first</span><span class="p">(</span><span class="n">schema_type</span><span class="o">=</span><span class="n">Task</span><span class="p">)</span>
+
+<span class="c1"># スカラー値（SELECT COUNT(*) などで使用）</span>
+<span class="n">count</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">scalar</span><span class="p">()</span>
+
+<span class="c1"># 影響を受けた行数</span>
+<span class="n">affected</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">rows_affected</span>
+</pre></div>
+</div>
+<p>### 3. トランザクション管理</p>
+<p>Litestarの依存性注入により、<cite>db_session</cite> が自動的にトランザクション管理されます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 変更を確定する場合は明示的にコミット</span>
+<span class="k">await</span> <span class="n">db_session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+<span class="c1"># エラー時は自動的にロールバック</span>
+<span class="c1"># try-except不要（Litestarプラグインが自動処理）</span>
+</pre></div>
+</div>
+</section>
+<section id="id7">
+<h2>動作確認<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># マイグレーション実行</span>
+sqlspec<span class="w"> </span>upgrade
+
+<span class="c1"># サーバー起動</span>
+litestar<span class="w"> </span>run<span class="w"> </span>--reload
+
+<span class="c1"># APIテスト</span>
+<span class="c1"># タスク作成</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/tasks<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;title&quot;: &quot;買い物に行く&quot;, &quot;priority&quot;: &quot;high&quot;}&#39;</span>
+
+<span class="c1"># タスク一覧取得</span>
+curl<span class="w"> </span>http://localhost:8000/tasks
+
+<span class="c1"># 完了済みタスクのみ取得</span>
+curl<span class="w"> </span>http://localhost:8000/tasks?completed<span class="o">=</span><span class="nb">true</span>
+
+<span class="c1"># ページネーション</span>
+curl<span class="w"> </span>http://localhost:8000/tasks?limit<span class="o">=</span><span class="m">5</span><span class="p">&amp;</span><span class="nv">offset</span><span class="o">=</span><span class="m">0</span>
+</pre></div>
+</div>
+</section>
+<section id="id8">
+<h2>SQLSpec使用時の注意点<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p>### マイグレーション</p>
+<ul class="simple">
+<li><p>❌ モデルからの自動生成は**サポートされていません**</p></li>
+<li><p>✅ SQLファイルを手動で作成する必要があります</p></li>
+<li><p>✅ タイムスタンプベースのファイル名を推奨（例: <cite>20251111125634_init.sql</cite>）</p></li>
+<li><p>✅ <cite>-- migrate-{version}-up</cite> と <cite>-- migrate-{version}-down</cite> セクションの両方を記述</p></li>
+</ul>
+<p>### パラメータ処理</p>
+<ul class="simple">
+<li><p>✅ <cite>execute()</cite> では <cite>*params</cite> で展開</p></li>
+<li><p>✅ <cite>select_one()</cite> では個別の引数として渡す</p></li>
+<li><p>✅ listでもtupleでも動作します</p></li>
+<li><p>⚠️ <cite>execute()</cite> に パラメータと共に`schema_type` を渡すとエラーになります</p></li>
+</ul>
+<p>### トランザクション</p>
+<ul class="simple">
+<li><p>✅ 変更系操作（INSERT/UPDATE/DELETE）後は <cite>commit()</cite> を呼ぶ</p></li>
+<li><p>✅ SELECT のみの場合はcommit不要</p></li>
+<li><p>✅ エラー時のロールバックは自動</p></li>
+</ul>
+</section>
+<section id="id9">
+<h2>まとめ<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>SQLSpecを使うことで、以下のメリットが得られました：</p>
+<p>✅ <strong>SQLをそのまま書ける</strong> - ORMの学習コスト不要
+✅ <strong>型安全</strong> - Pydanticモデルへの自動マッピング
+✅ <strong>マイグレーション管理</strong> - CLIで簡単に実行
+✅ <strong>柔軟性</strong> - 複雑なクエリもそのまま記述可能</p>
+<p>一方で以下の点には注意が必要です：</p>
+<p>⚠️ <strong>実験的なライブラリ</strong> - 本番環境では慎重に
+⚠️ <strong>マイグレーションは手動</strong> - SQLファイルを自分で書く必要がある
+⚠️ <strong>ドキュメント不足</strong> - 試行錯誤が必要な部分もある</p>
+<p>「ORMは便利だけど、結局SQL書くことが多い」という方で、実験的なツールを試してみたい方には、SQLSpecは興味深い選択肢になると思います。</p>
+<p>完全なコードは <a class="reference external" href="https://github.com/sion908/litestar-sqlspec-app">GitHubリポジトリ</a> で公開していますので、ぜひ試してみてください！</p>
+</section>
+<section id="id10">
+<h2>参考リンク<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/litestar-org/sqlspec">SQLSpec GitHub</a></p></li>
+<li><p><a class="reference external" href="https://docs.litestar.dev/">Litestar Documentation</a></p></li>
+<li><p><a class="reference external" href="https://docs.pydantic.dev/">Pydantic Documentation</a></p></li>
+</ul>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+      Previous:
+    
+    <a href="ai-pair-programming-htmx.html">
+      
+      <span>AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+      Next: 
+    <a href="litestar-ssr-lambda.html">
+      <span>サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる</span>
+      
+    </a>
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&amp;CRUD実装</a><ul>
+<li><a class="reference internal" href="#ormsqlspec">はじめに - ORMの課題とSQLSpecとの出会い</a></li>
+<li><a class="reference internal" href="#sqlspec">SQLSpecとは</a></li>
+<li><a class="reference internal" href="#id2">サンプルリポジトリ</a></li>
+<li><a class="reference internal" href="#id3">プロジェクト構成</a></li>
+<li><a class="reference internal" href="#id4">セットアップ</a></li>
+<li><a class="reference internal" href="#id5">マイグレーション管理</a></li>
+<li><a class="reference internal" href="#crud">CRUD実装</a></li>
+<li><a class="reference internal" href="#id6">SQLSpecの特徴的なポイント</a></li>
+<li><a class="reference internal" href="#id7">動作確認</a></li>
+<li><a class="reference internal" href="#id8">SQLSpec使用時の注意点</a></li>
+<li><a class="reference internal" href="#id9">まとめ</a></li>
+<li><a class="reference internal" href="#id10">参考リンク</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2025/sqlspec-orm.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&amp;CRUD実装</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>

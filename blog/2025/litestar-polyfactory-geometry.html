@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="litestarのpolyfactoryでGeometryを扱う" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2025/litestar-polyfactory-geometry.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="はじめに: litestar+sqlalchemyを用いてアプリの開発をしており、テストコードを書く際に、モックデータということで、litestarの派生ライブラリ？であるpolyfactoryを使った。 この時、geoalchemy2を使っているのだが、簡単には生成してくれなかったので、記事として残しておく。 スクリプト: 何をやったのか: 追加したのは、` LocationFactory..." />
+<meta name="description" content="はじめに: litestar+sqlalchemyを用いてアプリの開発をしており、テストコードを書く際に、モックデータということで、litestarの派生ライブラリ？であるpolyfactoryを使った。 この時、geoalchemy2を使っているのだが、簡単には生成してくれなかったので、記事として残しておく。 スクリプト: 何をやったのか: 追加したのは、` LocationFactory..." />
+
+    <title>litestarのpolyfactoryでGeometryを扱う &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">litestarのpolyfactoryでGeometryを扱う</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="litestarpolyfactorygeometry">
+<h1>litestarのpolyfactoryでGeometryを扱う<a class="headerlink" href="#litestarpolyfactorygeometry" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>はじめに<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>litestar+sqlalchemyを用いてアプリの開発をしており、テストコードを書く際に、モックデータということで、litestarの派生ライブラリ？であるpolyfactoryを使った。
+この時、geoalchemy2を使っているのだが、簡単には生成してくれなかったので、記事として残しておく。</p>
+</section>
+<section id="id2">
+<h2>スクリプト<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">advanced_alchemy.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">UUIDBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geoalchemy2</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geoalchemy2.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ST_X</span><span class="p">,</span> <span class="n">ST_Y</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">polyfactory.factories.sqlalchemy_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLAlchemyFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+
+
+<span class="c1"># Geometry型を含むSQLAlchemyモデル</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">advanced_alchemy.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">UUIDBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geoalchemy2</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geometry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">geoalchemy2.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ST_X</span><span class="p">,</span> <span class="n">ST_Y</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">polyfactory.factories.sqlalchemy_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLAlchemyFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span><span class="p">,</span> <span class="n">mapped_column</span>
+
+
+<span class="c1"># Geometry型を含むSQLAlchemyモデル</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Location</span><span class="p">(</span><span class="n">UUIDBase</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;locations&quot;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">location</span><span class="p">:</span> <span class="n">Mapped</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_column</span><span class="p">(</span><span class="n">Geometry</span><span class="p">(</span><span class="s2">&quot;POINT&quot;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Location(id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, location=(&lt;</span><span class="si">{</span><span class="n">ST_Y</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">)</span><span class="si">}</span><span class="s2">&gt; &lt;</span><span class="si">{</span><span class="n">ST_X</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">)</span><span class="si">}</span><span class="s2">&gt;)))&gt;&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LocationFactory</span><span class="p">(</span><span class="n">SQLAlchemyFactory</span><span class="p">[</span><span class="n">Location</span><span class="p">]):</span>
+    <span class="n">__model__</span> <span class="o">=</span> <span class="n">Location</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sqlalchemy_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_sqlalchemy_types</span><span class="p">()</span>
+        <span class="n">types</span><span class="p">[</span><span class="n">Geometry</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;POINT(</span><span class="si">{</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="w"> </span><span class="mi">180</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mi">90</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="n">types</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">location</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_sqlalchemy_types</span><span class="p">()[</span><span class="n">Geometry</span><span class="p">]()</span>
+
+<span class="c1"># 使用例</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">demo_mock_creation</span><span class="p">():</span>
+    <span class="n">loc</span> <span class="o">=</span> <span class="p">[</span><span class="n">LocationFactory</span><span class="p">()</span><span class="o">.</span><span class="n">build</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">loc</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="n">Location</span>
+        <span class="k">assert</span> <span class="n">l</span><span class="o">.</span><span class="n">location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+<span class="c1"># デモ実行</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">demo_mock_creation</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>何をやったのか<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>追加したのは、<a href="#id4"><span class="problematic" id="id5">`</span></a>LocationFactory`における, <a href="#id6"><span class="problematic" id="id7">`</span></a>get_sqlalchemy_types`の</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">types</span><span class="p">[</span><span class="n">Geometry</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;POINT(</span><span class="si">{</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="w"> </span><span class="mi">180</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mi">90</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span>
+</pre></div>
+</div>
+<p>の部分。
+ついでに、null許容だったのですが、モックでは値を必ず入れて欲しかったので</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">location</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_sqlalchemy_types</span><span class="p">()[</span><span class="n">Geometry</span><span class="p">]()</span>
+</pre></div>
+</div>
+<p>を追記しています。</p>
+<p>litestarのコミュニティにきいたところ</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>SQLA factory is a bit different to others in the sense there&#39;s an extra translation layer from column type to python type that needs to be done in factory.
+-- SQLA（SQLAlchemy）のファクトリーは他のものとは少し異なっていて、カラムの型をPythonの型に変換するための追加の変換レイヤーがファクトリー内に必要になるんだ。
+
+Can you try overriding https://polyfactory.litestar.dev/reference/factories/sqlalchemy_factory.html#polyfactory.factories.sqlalchemy_factory.SQLAlchemyFactory.get_sqlalchemy_types to map this type to callable that returns a random value for this column type?
+</pre></div>
+</div>
+<p>とのこと。
+そりゃ生成されないわけです。</p>
+</section>
+<section id="id8">
+<h2>元々のエラー<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>AttributeError:<span class="w"> </span><span class="s1">&#39;Geometry&#39;</span><span class="w"> </span>object<span class="w"> </span>has<span class="w"> </span>no<span class="w"> </span>attribute<span class="w"> </span><span class="s1">&#39;impl&#39;</span>
+It<span class="w"> </span>looks<span class="w"> </span>like<span class="w"> </span>this<span class="w"> </span>stems<span class="w"> </span>from<span class="w"> </span>polyfactory<span class="w"> </span>trying<span class="w"> </span>to<span class="w"> </span>infer<span class="w"> </span>a<span class="w"> </span>python_type<span class="w"> </span>from<span class="w"> </span>the<span class="w"> </span>Geometry<span class="w"> </span>column,<span class="w"> </span>which<span class="w"> </span>isn<span class="s1">&#39;t supported by GeoAlchemy2&#39;</span>s<span class="w"> </span>Geometry<span class="w"> </span>type.
+</pre></div>
+</div>
+<p>implがないとのことですね。
+AIに聞いても全然解決策の提示はしてもらえませんでした。</p>
+</section>
+<section id="id9">
+<h2>参考<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://polyfactory.litestar.dev/reference/factories/sqlalchemy_factory.html#polyfactory.factories.sqlalchemy_factory.SQLAlchemyFactory.get_sqlalchemy_types">https://polyfactory.litestar.dev/reference/factories/sqlalchemy_factory.html#polyfactory.factories.sqlalchemy_factory.SQLAlchemyFactory.get_sqlalchemy_types</a></p>
+</section>
+<section id="id10">
+<h2>追記<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<p>ドキュメント更新していただけました
+ありがとうございます
+<a class="reference external" href="https://github.com/litestar-org/polyfactory/pull/671">https://github.com/litestar-org/polyfactory/pull/671</a></p>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+      Previous:
+    
+    <a href="../2024/python-sqlalchemy-lambda-admin.html">
+      
+      <span>python+sqlalchemy+lambdaで管理者画面を作る</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+      Next: 
+    <a href="lambda-async-utility.html">
+      <span>AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話</span>
+      
+    </a>
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">litestarのpolyfactoryでGeometryを扱う</a><ul>
+<li><a class="reference internal" href="#id1">はじめに</a></li>
+<li><a class="reference internal" href="#id2">スクリプト</a></li>
+<li><a class="reference internal" href="#id3">何をやったのか</a></li>
+<li><a class="reference internal" href="#id8">元々のエラー</a></li>
+<li><a class="reference internal" href="#id9">参考</a></li>
+<li><a class="reference internal" href="#id10">追記</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2025/litestar-polyfactory-geometry.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">litestarのpolyfactoryでGeometryを扱う</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>

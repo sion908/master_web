@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="gitのブランチ移動を簡単にする" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2023/git-branch-script.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="はじめに: gitでバージョン管理をしている GUIの操作を覚えたくないのでCLIでやろうとするが長くなりがちなブランチ名をいちいちコピペするのもめんどくさい というところで、ブランチの移動とやりたいときはマージまでコマンドで簡単にできないかとシェルスクリプトを作成した。 これでブランチの移動にストレスがなくなりました`./bashrc`への追加でさらに使いやすくなります 何か意見改善点あれ..." />
+<meta name="description" content="はじめに: gitでバージョン管理をしている GUIの操作を覚えたくないのでCLIでやろうとするが長くなりがちなブランチ名をいちいちコピペするのもめんどくさい というところで、ブランチの移動とやりたいときはマージまでコマンドで簡単にできないかとシェルスクリプトを作成した。 これでブランチの移動にストレスがなくなりました`./bashrc`への追加でさらに使いやすくなります 何か意見改善点あれ..." />
+
+    <title>gitのブランチ移動を簡単にする &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">gitのブランチ移動を簡単にする</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="git">
+<h1>gitのブランチ移動を簡単にする<a class="headerlink" href="#git" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>はじめに<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>gitでバージョン管理をしている
+GUIの操作を覚えたくないのでCLIでやろうとするが長くなりがちなブランチ名をいちいちコピペするのもめんどくさい
+というところで、ブランチの移動とやりたいときはマージまでコマンドで簡単にできないかとシェルスクリプトを作成した。
+これでブランチの移動にストレスがなくなりました
+<a href="#id2"><span class="problematic" id="id3">`</span></a>./bashrc`への追加でさらに使いやすくなります
+何か意見改善点あればぜひ教えてください！！</p>
+</section>
+<section id="id4">
+<h2>制作品<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p>### 完成品</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># helpの表示</span>
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;-h&#39;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;usage gcn &lt;opt&gt; &lt;num&gt;&#39;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;&#39;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;opt&#39;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39; -h show help&#39;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39; -m integrate before into after&#39;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39; -p pull the branch after move&#39;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;num&#39;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39; input the branch num&#39;</span>
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nv">branches</span><span class="o">=(</span><span class="k">$(</span>git<span class="w"> </span><span class="k">for</span>-each-ref<span class="w"> </span>--format<span class="o">=</span><span class="s1">&#39;%(refname:short)&#39;</span><span class="w"> </span>refs/heads/<span class="k">)</span><span class="o">)</span>
+
+<span class="nv">be_branch_name</span><span class="o">=(</span><span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>--abbrev-ref<span class="w"> </span>HEAD<span class="k">)</span><span class="o">)</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Available branches:&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="p">!branches[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;%3d&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;: </span><span class="si">${</span><span class="nv">branches</span><span class="p">[</span><span class="nv">$i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+
+
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span>~<span class="w"> </span>^<span class="o">[</span><span class="m">0</span>-9<span class="o">]</span>+$<span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nv">branch_number</span><span class="o">=</span><span class="nv">$1</span>
+<span class="k">else</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span>~<span class="w"> </span>^<span class="o">[</span><span class="m">0</span>-9<span class="o">]</span>+$<span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nv">branch_number</span><span class="o">=</span><span class="nv">$2</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">read</span><span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;Enter branch number to checkout: &quot;</span><span class="w"> </span>branch_number
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$branch_number</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$branch_number</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;q&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Invalid branch number.&quot;</span>
+<span class="w">      </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="k">fi</span>
+
+<span class="nv">af_branch_name</span><span class="o">=</span><span class="si">${</span><span class="nv">branches</span><span class="p">[</span><span class="nv">$branch_number</span><span class="p">]</span><span class="si">}</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;chosed branch: &lt;&quot;</span><span class="w"> </span><span class="nv">$af_branch_name</span><span class="w"> </span><span class="s2">&quot;&gt;&quot;</span>
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$af_branch_name</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Invalid branch number.&quot;</span>
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">else</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&gt;&gt; git checkout </span><span class="nv">$af_branch_name</span><span class="s2">&quot;</span>
+<span class="w">  </span>git<span class="w"> </span>checkout<span class="w"> </span><span class="nv">$af_branch_name</span>
+<span class="k">fi</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span>~<span class="w"> </span><span class="o">[</span>p<span class="o">]</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="c1"># 引数がある場合は、引数の値を出力</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&gt;&gt; git pull origin </span><span class="nv">$af_branch_name</span><span class="s2">&quot;</span>
+<span class="w">  </span>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span><span class="nv">$af_branch_name</span>
+<span class="k">fi</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span>~<span class="w"> </span><span class="o">[</span>m<span class="o">]</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="c1"># 引数がある場合は、引数の値を出力</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&gt;&gt; git merge </span><span class="nv">$be_branch_name</span><span class="s2">&quot;</span>
+<span class="w">  </span>git<span class="w"> </span>merge<span class="w"> </span><span class="nv">$be_branch_name</span>
+<span class="k">fi</span>
+</pre></div>
+</div>
+<p>### 使い方</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>./git_checkout_by_number.sh
+<span class="w">　　</span>Available<span class="w"> </span>branches:
+<span class="w">   </span><span class="m">0</span>:<span class="w"> </span>develop
+<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>feature/branch1
+<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>feature/branch2
+<span class="w">  </span>Enter<span class="w"> </span>branch<span class="w"> </span>number<span class="w"> </span>to<span class="w"> </span>checkout:<span class="w">　</span><span class="m">１</span>
+<span class="w">  </span>Switched<span class="w"> </span>to<span class="w"> </span>branch<span class="w"> </span><span class="s1">&#39;feature/branch1&#39;</span>
+</pre></div>
+</div>
+<p>シェルスクリプトを実行するとブランチの一覧が表示され、数字を指定することで、そのブランチに移動することができる。
+<cite>./git_checkout_by_number.sh -m</cite>
+のように引数をとにかく何か入れることで、ブランチの移動をした後にその前にいたブランチがマージされる</p>
+</section>
+<section id="id5">
+<h2>スクリプトの説明<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>## ブランチの取得と表示</p>
+<p>数字が二桁になっても揃うようにしている</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">branches</span><span class="o">=(</span><span class="k">$(</span>git<span class="w"> </span><span class="k">for</span>-each-ref<span class="w"> </span>--format<span class="o">=</span><span class="s1">&#39;%(refname:short)&#39;</span><span class="w"> </span>refs/heads/<span class="k">)</span><span class="o">)</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Available branches:&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="p">!branches[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;%3d&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;: </span><span class="si">${</span><span class="nv">branches</span><span class="p">[</span><span class="nv">$i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<p>## 入力の取得と例外処理</p>
+<p>間違えた時とか用に入力なしまたは`q`を入力することで実行が止まるようにしている</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">read</span><span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;Enter branch number to checkout: &quot;</span><span class="w"> </span>branch_number
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$branch_number</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$branch_number</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;q&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Invalid branch number.&quot;</span>
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+</pre></div>
+</div>
+<p>## ブランチの取得と`checkout`</p>
+<p>移動先のブランチ名を取得し、あれば移動するようにする.
+数字であれば範囲外のものを入れるとちゃんとエラーとなってくれるが、例えば`a`とか入れると0のブランチに飛ぶ
+なぜ？？</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">af_branch_name</span><span class="o">=</span><span class="si">${</span><span class="nv">branches</span><span class="p">[</span><span class="nv">$branch_number</span><span class="p">]</span><span class="si">}</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$af_branch_name</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Invalid branch number.&quot;</span>
+<span class="k">else</span>
+<span class="w">  </span>git<span class="w"> </span>checkout<span class="w"> </span><span class="nv">$af_branch_name</span>
+<span class="k">fi</span>
+</pre></div>
+</div>
+<p>## マージの処理</p>
+<p>あらかじめ取得してあった現在のブランチをマージするように
+引数を指定してもいいが、表記揺れがあっても実行するように今回はとにかく引数があればこれが実行されることとした</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">be_branch_name</span><span class="o">=(</span><span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>--abbrev-ref<span class="w"> </span>HEAD<span class="k">)</span><span class="o">)</span>
+...
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$#</span><span class="w"> </span>-gt<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="c1"># 引数がある場合は、引数の値を出力</span>
+<span class="w">  </span>git<span class="w"> </span>merge<span class="w"> </span><span class="nv">$be_branch_name</span>
+<span class="k">fi</span>
+</pre></div>
+</div>
+</section>
+<section id="bashrc">
+<h2><a href="#id6"><span class="problematic" id="id7">`</span></a>.bashrc`への登録<a class="headerlink" href="#bashrc" title="Link to this heading">¶</a></h2>
+<p>gitは比較的どこでも使うので`./bashrc`に登録したほうが使いやすいです
+いちいちプロジェクトごとに置いとくのもignoreするのもめんどいですしね
+自分の場合は`git_checkout_by_number.sh`を`/usr/local/bin/mine/<a href="#id8"><span class="problematic" id="id9">`</span></a>において、
+.bashrcに下記を追記しました。</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/bin/mine/:<span class="nv">$PATH</span>
+<span class="nb">alias</span><span class="w"> </span><span class="nv">gcbn</span><span class="o">=</span><span class="s1">&#39;git_checkout_by_number&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>gcbn
+</pre></div>
+</div>
+<p>で利用できます</p>
+</section>
+<section id="id10">
+<h2>参考文献<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<p>ごめんなさい
+あったかもしれませんが忘れました
+参考にした方ありがとうございました</p>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+      Next: 
+    <a href="../2024/python-sqlalchemy-lambda-admin.html">
+      <span>python+sqlalchemy+lambdaで管理者画面を作る</span>
+      
+    </a>
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">gitのブランチ移動を簡単にする</a><ul>
+<li><a class="reference internal" href="#id1">はじめに</a></li>
+<li><a class="reference internal" href="#id4">制作品</a></li>
+<li><a class="reference internal" href="#id5">スクリプトの説明</a></li>
+<li><a class="reference internal" href="#bashrc">`.bashrc`への登録</a></li>
+<li><a class="reference internal" href="#id10">参考文献</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2023/git-branch-script.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">gitのブランチ移動を簡単にする</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なDB操作" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2026/flask-sqlspec-crud.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="はじめに: FlaskでのDB操作といえばSQLAlchemyが定番ですが、生SQLを書きつつ型安全性も保ちたい場面があります。そんな時に出会ったのがSQLSpecです。 SQLSpecとは: SQLSpec は生SQLを書きながら型安全なDB操作を可能にするライブラリ。ORM特有の記法を覚える必要がなく、SQL知識があればすぐに使えるのが特徴です。Flaskプラグインも提供されており、SQ..." />
+<meta name="description" content="はじめに: FlaskでのDB操作といえばSQLAlchemyが定番ですが、生SQLを書きつつ型安全性も保ちたい場面があります。そんな時に出会ったのがSQLSpecです。 SQLSpecとは: SQLSpec は生SQLを書きながら型安全なDB操作を可能にするライブラリ。ORM特有の記法を覚える必要がなく、SQL知識があればすぐに使えるのが特徴です。Flaskプラグインも提供されており、SQ..." />
+
+    <title>FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なDB操作 &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なDB操作</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="flasksqlspeccrud-ormdb">
+<h1>FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なDB操作<a class="headerlink" href="#flasksqlspeccrud-ormdb" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>はじめに<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>FlaskでのDB操作といえばSQLAlchemyが定番ですが、生SQLを書きつつ型安全性も保ちたい場面があります。そんな時に出会ったのがSQLSpecです。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>注意: SQLSpecは現在実験的なライブラリです。本番環境での使用前に十分な検証を行ってください。</p>
+</div>
+</section>
+<section id="sqlspec">
+<h2>SQLSpecとは<a class="headerlink" href="#sqlspec" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/litestar-org/sqlspec">SQLSpec</a> は生SQLを書きながら型安全なDB操作を可能にするライブラリ。ORM特有の記法を覚える必要がなく、SQL知識があればすぐに使えるのが特徴です。Flaskプラグインも提供されており、SQLite・PostgreSQL・MySQLなど複数のDBに対応しています。</p>
+</section>
+<section id="id3">
+<h2>プロジェクト構成<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>flask-sqlspec-demo/
+├── app/
+│   ├── __init__.py         # Flaskアプリファクトリ
+│   ├── database.py         # DB初期化
+│   └── routes.py           # CRUDエンドポイント
+├── data/                   # SQLite DBファイル用ディレクトリ
+├── pyproject.toml
+├── docker-compose.yml
+└── Dockerfile
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>サンプルレポジトリ<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/sion908/sqlspec_flask">https://github.com/sion908/sqlspec_flask</a></p>
+</section>
+<section id="id5">
+<h2>セットアップ<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>### 1. 依存関係</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+<span class="k">[project]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;flask-sqlspec-demo&quot;</span>
+<span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;0.1.0&quot;</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Flask + SQLSpec CRUD demo with SQLite&quot;</span>
+<span class="n">requires-python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&gt;=3.12&quot;</span>
+<span class="n">dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;flask&gt;=3.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;sqlspec[sqlite]&gt;=0.1.0&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>### 2. Docker環境</p>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="c"># Dockerfile</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:3.12-slim</span>
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
+<span class="k">COPY</span><span class="w"> </span>pyproject.toml<span class="w"> </span>./
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+
+<span class="k">COPY</span><span class="w"> </span>app/<span class="w"> </span>./app/
+
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">5000</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;python&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-m&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;flask&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;run&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--host=0.0.0.0&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># docker-compose.yml</span>
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">app</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;5001:5000&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./data:/data</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PYTHONDONTWRITEBYTECODE=1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PYTHONUNBUFFERED=1</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h2>実装<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<p>### 1. Flaskアプリファクトリ</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/__init__.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLSpec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec.adapters.sqlite</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqliteConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec.extensions.flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLSpecPlugin</span>
+
+<span class="n">DB_PATH</span> <span class="o">=</span> <span class="s2">&quot;/data/app.db&quot;</span>
+
+<span class="n">sqlalchemy_spec</span><span class="p">:</span> <span class="n">SQLSpec</span> <span class="o">=</span> <span class="n">SQLSpec</span><span class="p">()</span>
+<span class="n">plugin</span><span class="p">:</span> <span class="n">SQLSpecPlugin</span>
+<span class="n">db_config</span><span class="p">:</span> <span class="n">SqliteConfig</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Flask</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flask アプリを生成し、SQLSpec と CRUD Blueprintを登録する。&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">plugin</span><span class="p">,</span> <span class="n">db_config</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="c1"># SQLSpec設定</span>
+    <span class="n">db_config</span> <span class="o">=</span> <span class="n">SqliteConfig</span><span class="p">(</span>
+        <span class="n">connection_config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="n">DB_PATH</span><span class="p">},</span>
+        <span class="n">extension_config</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;flask&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;commit_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;autocommit&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;session_key&quot;</span><span class="p">:</span> <span class="s2">&quot;db&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">sqlalchemy_spec</span><span class="o">.</span><span class="n">add_config</span><span class="p">(</span><span class="n">db_config</span><span class="p">)</span>
+
+    <span class="c1"># Flaskプラグイン登録</span>
+    <span class="n">plugin</span> <span class="o">=</span> <span class="n">SQLSpecPlugin</span><span class="p">(</span><span class="n">sqlalchemy_spec</span><span class="p">,</span> <span class="n">app</span><span class="p">)</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">app.database</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_db</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">app.routes</span><span class="w"> </span><span class="kn">import</span> <span class="n">items_bp</span>
+
+    <span class="n">init_db</span><span class="p">(</span><span class="n">DB_PATH</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">items_bp</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">app</span>
+</pre></div>
+</div>
+<p>### 2. データベース初期化</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/database.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+
+<span class="n">CREATE_ITEMS_TABLE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">CREATE TABLE IF NOT EXISTS items (</span>
+<span class="s2">    id          INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s2">    name        TEXT    NOT NULL,</span>
+<span class="s2">    description TEXT,</span>
+<span class="s2">    created_at  TEXT    DEFAULT (datetime(&#39;now&#39;, &#39;localtime&#39;))</span>
+<span class="s2">)</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">init_db</span><span class="p">(</span><span class="n">db_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;アプリ起動時に items テーブルを作成する。&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">CREATE_ITEMS_TABLE</span><span class="p">)</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>### 3. CRUDエンドポイント</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># app/routes.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">app</span><span class="w"> </span><span class="kn">import</span> <span class="n">plugin</span>
+
+<span class="n">items_bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s2">&quot;items&quot;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s2">&quot;/items&quot;</span><span class="p">)</span>
+
+<span class="nd">@items_bp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_items</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;全アイテムを取得する。&quot;&quot;&quot;</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get_session</span><span class="p">()</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT id, name, description, created_at FROM items ORDER BY id&quot;</span><span class="p">)</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">if</span> <span class="n">rows</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="mi">200</span>
+
+<span class="nd">@items_bp</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_item</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;新規アイテムを作成する。&quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;nameは必須です&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get_session</span><span class="p">()</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;INSERT INTO items (name, description) VALUES (?, ?)&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">row</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;SELECT id, name, description, created_at FROM items WHERE rowid = last_insert_rowid()&quot;</span>
+    <span class="p">)</span>
+    <span class="n">created</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">created</span><span class="p">),</span> <span class="mi">201</span>
+
+<span class="nd">@items_bp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&lt;int:item_id&gt;&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_item</span><span class="p">(</span><span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;指定IDのアイテムを取得する。&quot;&quot;&quot;</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get_session</span><span class="p">()</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;SELECT id, name, description, created_at FROM items WHERE id = ?&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">item_id</span><span class="p">,),</span>
+    <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;アイテムが見つかりません&quot;</span><span class="p">}),</span> <span class="mi">404</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="mi">200</span>
+
+<span class="nd">@items_bp</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/&lt;int:item_id&gt;&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_item</span><span class="p">(</span><span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;指定IDのアイテムを更新する。&quot;&quot;&quot;</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get_session</span><span class="p">()</span>
+
+    <span class="n">existing</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;SELECT id FROM items WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">item_id</span><span class="p">,)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;アイテムが見つかりません&quot;</span><span class="p">}),</span> <span class="mi">404</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;nameは必須です&quot;</span><span class="p">}),</span> <span class="mi">400</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span>
+    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;UPDATE items SET name = ?, description = ? WHERE id = ?&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">item_id</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">row</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;SELECT id, name, description, created_at FROM items WHERE id = ?&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">item_id</span><span class="p">,),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">one</span><span class="p">()),</span> <span class="mi">200</span>
+
+<span class="nd">@items_bp</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/&lt;int:item_id&gt;&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_item</span><span class="p">(</span><span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;指定IDのアイテムを削除する。&quot;&quot;&quot;</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get_session</span><span class="p">()</span>
+
+    <span class="n">existing</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;SELECT id FROM items WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">item_id</span><span class="p">,)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;アイテムが見つかりません&quot;</span><span class="p">}),</span> <span class="mi">404</span>
+
+    <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM items WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">item_id</span><span class="p">,))</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;アイテム </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2"> を削除しました&quot;</span><span class="p">}),</span> <span class="mi">200</span>
+</pre></div>
+</div>
+</section>
+<section id="id7">
+<h2>SQLSpecの特徴的なポイント<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<p>### 1. Flask拡張の統合</p>
+<p>SQLSpecのFlaskプラグインを使うことで、簡単にFlaskアプリに統合できます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqlspec.extensions.flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLSpecPlugin</span>
+
+<span class="n">plugin</span> <span class="o">=</span> <span class="n">SQLSpecPlugin</span><span class="p">(</span><span class="n">sqlalchemy_spec</span><span class="p">,</span> <span class="n">app</span><span class="p">)</span>
+
+<span class="c1"># エンドポイント内でセッション取得</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">get_session</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>### 2. 結果の操作</p>
+<p>SQLSpecは <cite>SQLResult</cite> オブジェクトを返し、便利なメソッドを提供します：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 全件取得</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM items&quot;</span><span class="p">)</span>
+<span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">if</span> <span class="n">rows</span> <span class="k">else</span> <span class="p">[])</span>
+
+<span class="c1"># 1件取得（必ず1件ある場合）</span>
+<span class="n">item</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+
+<span class="c1"># 1件取得（0件の場合はNone）</span>
+<span class="n">item</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">one_or_none</span><span class="p">()</span>
+
+<span class="c1"># 影響を受けた行数</span>
+<span class="n">affected</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">rows_affected</span>
+</pre></div>
+</div>
+<p>### 3. パラメータバインディング</p>
+<p>SQLインジェクション対策のため、パラメータは必ずプレースホルダーを使用：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ✅ 安全</span>
+<span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM items WHERE id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">item_id</span><span class="p">,))</span>
+
+<span class="c1"># ❌ 危険</span>
+<span class="n">db</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SELECT * FROM items WHERE id = </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>### 4. 自動コミットモード</p>
+<p>Flask拡張の設定で <cite>autocommit</cite> モードを有効にできます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">extension_config</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;flask&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;commit_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;autocommit&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;session_key&quot;</span><span class="p">:</span> <span class="s2">&quot;db&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>これにより、明示的なコミットが不要になります。</p>
+</section>
+<section id="id8">
+<h2>動作確認<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p>### 1. アプリケーション起動</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dockerで起動</span>
+docker-compose<span class="w"> </span>up<span class="w"> </span>--build
+
+<span class="c1"># またはローカルで起動</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+python<span class="w"> </span>-m<span class="w"> </span>flask<span class="w"> </span>--app<span class="w"> </span>app<span class="w"> </span>run<span class="w"> </span>--debug
+</pre></div>
+</div>
+<p>### 2. APIテスト</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># アイテム作成</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:5001/items<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: &quot;テストアイテム&quot;, &quot;description&quot;: &quot;これはテストです&quot;}&#39;</span>
+
+<span class="c1"># 全アイテム取得</span>
+curl<span class="w"> </span>http://localhost:5001/items/
+
+<span class="c1"># 特定アイテム取得</span>
+curl<span class="w"> </span>http://localhost:5001/items/1
+
+<span class="c1"># アイテム更新</span>
+curl<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>http://localhost:5001/items/1<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: &quot;更新されたアイテム&quot;, &quot;description&quot;: &quot;更新されました&quot;}&#39;</span>
+
+<span class="c1"># アイテム削除</span>
+curl<span class="w"> </span>-X<span class="w"> </span>DELETE<span class="w"> </span>http://localhost:5001/items/1
+</pre></div>
+</div>
+</section>
+<section id="flask-sqlspec">
+<h2>Flask + SQLSpecの利点<a class="headerlink" href="#flask-sqlspec" title="Link to this heading">¶</a></h2>
+<p>### 1. シンプルさ</p>
+<ul class="simple">
+<li><p>学習コストが低い - SQL知識があればすぐに使える</p></li>
+<li><p>コードが直感的 - ORM特有の記法を覚える必要がない</p></li>
+<li><p>デバッグが容易 - 実行されるSQLが明確</p></li>
+</ul>
+<p>### 2. 柔軟性</p>
+<ul class="simple">
+<li><p>複雑なクエリも対応 - JOIN、サブクエリなどもそのまま書ける</p></li>
+<li><p>DBに依存しない - SQLite、PostgreSQL、MySQLで同じ書き方</p></li>
+<li><p>パフォーマンス最適化 - SQLを直接制御できる</p></li>
+</ul>
+<p>### 3. 型安全性</p>
+<ul class="simple">
+<li><p>結果の型変換 - 自動で適切なPython型に変換</p></li>
+<li><p>エラーハンドリング - SQL実行時のエラーを適切に処理</p></li>
+<li><p>IDEサポート - SQLシンタックスハイライトが効く</p></li>
+</ul>
+</section>
+<section id="id9">
+<h2>注意点と制限<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>### 1. 実験的なライブラリ</p>
+<ul class="simple">
+<li><p>安定性 - API変更の可能性あり</p></li>
+<li><p>ドキュメント - まだ整備されていない部分あり</p></li>
+<li><p>コミュニティ - 小規模なため、情報が少ない</p></li>
+</ul>
+<p>### 2. マイグレーション</p>
+<ul class="simple">
+<li><p>自動生成なし - マイグレーションファイルは手動作成</p></li>
+<li><p>バージョン管理 - 別途管理が必要</p></li>
+</ul>
+<p>### 3. Flask統合</p>
+<ul class="simple">
+<li><p>プラグイン依存 - Flask拡張に依存する部分あり</p></li>
+<li><p>セッション管理 - 複雑なトランザクションには工夫が必要</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>まとめ<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<p>Flask + SQLSpecで試してみた感想としては、ORMの学習コストをかけずに型安全なDB操作ができるのは魅力的でした。特にSQLを直接書ける点は、複雑なクエリが必要な場面で重宝しそうです。</p>
+<p>ただし実験的なライブラリなので、本番利用は慎重に。マイグレーションも手動になるため、小規模なプロジェクトや個人開発向けかもしれません。</p>
+<p>「ORMは便利だけど、もっとシンプルにSQLを書きたい」という場合は試す価値ありそうです。</p>
+<p>コードは <a class="reference external" href="https://github.com/sion908/flask-sqlspec-demo">GitHubリポジトリ</a> に置いています。</p>
+</section>
+<section id="id11">
+<h2>参考リンク<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/litestar-org/sqlspec">SQLSpec GitHub</a></p></li>
+<li><p><a class="reference external" href="https://flask.palletsprojects.com/">Flask Documentation</a></p></li>
+<li><p><a class="reference external" href="https://sqlite.org/docs.html">SQLite Documentation</a></p></li>
+</ul>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+      Previous:
+    
+    <a href="../2025/litestar-ssr-lambda.html">
+      
+      <span>サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なDB操作</a><ul>
+<li><a class="reference internal" href="#id1">はじめに</a></li>
+<li><a class="reference internal" href="#sqlspec">SQLSpecとは</a></li>
+<li><a class="reference internal" href="#id3">プロジェクト構成</a></li>
+<li><a class="reference internal" href="#id4">サンプルレポジトリ</a></li>
+<li><a class="reference internal" href="#id5">セットアップ</a></li>
+<li><a class="reference internal" href="#id6">実装</a></li>
+<li><a class="reference internal" href="#id7">SQLSpecの特徴的なポイント</a></li>
+<li><a class="reference internal" href="#id8">動作確認</a></li>
+<li><a class="reference internal" href="#flask-sqlspec">Flask + SQLSpecの利点</a></li>
+<li><a class="reference internal" href="#id9">注意点と制限</a></li>
+<li><a class="reference internal" href="#id10">まとめ</a></li>
+<li><a class="reference internal" href="#id11">参考リンク</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2026/flask-sqlspec-crud.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なDB操作</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>

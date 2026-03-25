@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="python+sqlalchemy+lambdaで管理者画面を作る" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2024/python-sqlalchemy-lambda-admin.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="背景: バックエンドエンジニアをやっています。litestar+sqlalchemy+lambdaの構成でAPIをつくったのですが、フロントの方から管理者画面を作った方がいいよの声が... 普通みんな持ってるでしょって言われました あるあるなんでしょうか？ みなさん教えてください というわけで、管理者画面を拵えることになったのですが、工数はないので、適当なライブラリを使うことに。Django..." />
+<meta name="description" content="背景: バックエンドエンジニアをやっています。litestar+sqlalchemy+lambdaの構成でAPIをつくったのですが、フロントの方から管理者画面を作った方がいいよの声が... 普通みんな持ってるでしょって言われました あるあるなんでしょうか？ みなさん教えてください というわけで、管理者画面を拵えることになったのですが、工数はないので、適当なライブラリを使うことに。Django..." />
+
+    <title>python+sqlalchemy+lambdaで管理者画面を作る &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">python+sqlalchemy+lambdaで管理者画面を作る</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="python-sqlalchemy-lambda">
+<h1>python+sqlalchemy+lambdaで管理者画面を作る<a class="headerlink" href="#python-sqlalchemy-lambda" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>背景<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>バックエンドエンジニアをやっています。litestar+sqlalchemy+lambdaの構成でAPIをつくったのですが、フロントの方から管理者画面を作った方がいいよの声が...
+普通みんな持ってるでしょって言われました
+あるあるなんでしょうか？
+みなさん教えてください</p>
+<p>というわけで、管理者画面を拵えることになったのですが、工数はないので、適当なライブラリを使うことに。Djangoみたいに簡単にできればいいなというところで、<a href="#id2"><span class="problematic" id="id3">`</span></a>sqladmin &lt;<a class="reference external" href="https://github.com/aminalaee/sqladmin">https://github.com/aminalaee/sqladmin</a>&gt;`_を見つけました。
+簡単な管理者画面にはとてもいいのですが、jinja2で毎レスポンスごとに、全てのhtmlを送ってくる仕様でした。
+ちょっと困るのでlambda+cognitoで使えるようにhtmxを使って書き換えることにしました。</p>
+</section>
+<section id="tl-dr">
+<h2>TL;DR<a class="headerlink" href="#tl-dr" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>sqladminでcrudできるの楽しい</p></li>
+<li><p>htmxおもしろい</p></li>
+<li><p><a href="#id4"><span class="problematic" id="id5">`</span></a>sqladminlambda &lt;<a class="reference external" href="https://github.com/sion908/sqladminlambda">https://github.com/sion908/sqladminlambda</a>&gt;`_作ってみたので、みてみてください</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>そもそも<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<p>## sqladminについて</p>
+<p>sqlalchemyのモデル定義をもとに、starlette系のASGIライブラリで管理者画面を作ることができる。
+starletteでasgiを作り、sqlalchemyのモデルをwtformsでフォーム化、jinja2でhtmlをレンダリングする。</p>
+<a class="reference internal image-reference" href="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/698479/4a83f763-444b-3acb-ff40-868dc1a9e270.png"><img alt="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/698479/4a83f763-444b-3acb-ff40-868dc1a9e270.png" src="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/698479/4a83f763-444b-3acb-ff40-868dc1a9e270.png" style="width: 50%;" />
+</a>
+<a class="reference internal image-reference" href="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/698479/5bcb2a62-bd90-5d5e-c4ef-ab3e69a06b0d.png"><img alt="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/698479/5bcb2a62-bd90-5d5e-c4ef-ab3e69a06b0d.png" src="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/698479/5bcb2a62-bd90-5d5e-c4ef-ab3e69a06b0d.png" style="width: 80%;" />
+</a>
+<p>## 利点
+- 少しの変更で、crudができるようになる
+- モデルのcrudの前に処理を挟むことができるので、必要な独自処理を追加できる
+- 拡張性が高い</p>
+<p>## 個人的に足りなかったこと
+- 毎回全てのhtmlをレンダリングして返してくるので、効率が悪い</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>せめて、最小限のDOMを返すようにしたい</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>cognitoに対応したい</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>開発<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<p>色々やってみたかったのですが、第一弾として、htmxに対応してもらって、id_tokenを渡すことで、apigatewayの認証にも対応できるようにしました。</p>
+</section>
+<section id="id8">
+<h2>やったこと<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>htmxによる擬似的なページ遷移の実現</p></li>
+<li><p>htmxによるDOM操作</p></li>
+<li><p>htmxでid_tokenを渡せるように修正</p></li>
+</ul>
+<p>## htmxについて</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">button</span> <span class="na">hx-get</span><span class="o">=</span><span class="s">&quot;/api/user-info&quot;</span>
+  <span class="na">hx-trigger</span><span class="o">=</span><span class="s">&quot;load&quot;</span>
+  <span class="na">hx-headers</span><span class="o">=</span><span class="s">&#39;{&quot;Authorization&quot;: &quot;Bearer ${localStorage.getItem(&quot;id_token&quot;)}&quot;}&#39;</span>
+  <span class="na">hx-target</span><span class="o">=</span><span class="s">&quot;this&quot;</span>
+  <span class="na">hx-push-url</span><span class="o">=</span><span class="s">&quot;true&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>このbutton操作によってできること</p>
+<ol class="arabic simple">
+<li><p>DOM操作
+- <a href="#id9"><span class="problematic" id="id10">`</span></a>hx-target`属性を使用して、更新する要素を指定
+- <a href="#id11"><span class="problematic" id="id12">`</span></a>hx-trigger`で、いつHTMXのリクエストを実行するかを制御</p></li>
+</ol>
+<ol class="arabic simple">
+<li><p>認証トークンの設定
+- 個別のリクエストで`hx-headers`属性を使用してヘッダーを設定</p></li>
+</ol>
+<ol class="arabic simple">
+<li><p>ルーティングの仮想遷移
+- <a href="#id13"><span class="problematic" id="id14">`</span></a>hx-push-url=&quot;true&quot;<a href="#id15"><span class="problematic" id="id16">`</span></a>属性により、ブラウザの履歴にURLを追加</p></li>
+</ol>
+</section>
+<section id="id17">
+<h2>終わりに<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<p>あくまでも個人的見解です。
+夢はあるなと
+cognitoの対応もしたのですが、sqladminの外側で定義したので、ライブラリに含めることはできなかったです。
+lambdaとsession周りをどう適応させるかわからず今回はこのような方式にしましたが、ちょくちょく認証が切れて、ログアウトさせられるのをどうにかしたいところです。
+最近litestarにハマっているので、starlette系だけではなく、litestarにも対応させたいです。litestarの方にも`piccolo admin`がありましたが、こちらの方が使いやすそうな印象でした。
+文章力がほしい...</p>
+</section>
+<section id="id18">
+<h2>参考<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://aminalaee.dev/sqladmin/">https://aminalaee.dev/sqladmin/</a></p>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+      Previous:
+    
+    <a href="../2023/git-branch-script.html">
+      
+      <span>gitのブランチ移動を簡単にする</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+      Next: 
+    <a href="../2025/litestar-polyfactory-geometry.html">
+      <span>litestarのpolyfactoryでGeometryを扱う</span>
+      
+    </a>
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">python+sqlalchemy+lambdaで管理者画面を作る</a><ul>
+<li><a class="reference internal" href="#id1">背景</a></li>
+<li><a class="reference internal" href="#tl-dr">TL;DR</a></li>
+<li><a class="reference internal" href="#id6">そもそも</a></li>
+<li><a class="reference internal" href="#id7">開発</a></li>
+<li><a class="reference internal" href="#id8">やったこと</a></li>
+<li><a class="reference internal" href="#id17">終わりに</a></li>
+<li><a class="reference internal" href="#id18">参考</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2024/python-sqlalchemy-lambda-admin.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">python+sqlalchemy+lambdaで管理者画面を作る</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2025/litestar-ssr-lambda.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="TL;DR: SSRは古いんじゃなくて、設計の節度を取り戻す技術だと思ってる, Litestar + Jinja2 はSSRの&quot;素直さ&quot;が出る（テンプレ設定がまっすぐ）, Lambda上では Mangum でASGIアプリをイベントに繋ぐのが手堅い, htmxは&quot;簡単に動く&quot;けど、綺麗に育てる設計が意外と難しい（AIはそこに効く）. SSRが&quot..." />
+<meta name="description" content="TL;DR: SSRは古いんじゃなくて、設計の節度を取り戻す技術だと思ってる, Litestar + Jinja2 はSSRの&quot;素直さ&quot;が出る（テンプレ設定がまっすぐ）, Lambda上では Mangum でASGIアプリをイベントに繋ぐのが手堅い, htmxは&quot;簡単に動く&quot;けど、綺麗に育てる設計が意外と難しい（AIはそこに効く）. SSRが&quot..." />
+
+    <title>サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="ssr-litestar-jinja2-mangumlambda">
+<h1>サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる<a class="headerlink" href="#ssr-litestar-jinja2-mangumlambda" title="Link to this heading">¶</a></h1>
+<section id="tl-dr">
+<h2>TL;DR<a class="headerlink" href="#tl-dr" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>SSRは古いんじゃなくて、設計の節度を取り戻す技術だと思ってる</p></li>
+<li><p>Litestar + Jinja2 はSSRの&quot;素直さ&quot;が出る（テンプレ設定がまっすぐ）</p></li>
+<li><p>Lambda上では Mangum でASGIアプリをイベントに繋ぐのが手堅い</p></li>
+<li><p>htmxは&quot;簡単に動く&quot;けど、綺麗に育てる設計が意外と難しい（AIはそこに効く）</p></li>
+</ul>
+</section>
+<section id="ssr">
+<h2>SSRが&quot;当たり前じゃなくなった&quot;今、なぜやるのか（思想）<a class="headerlink" href="#ssr" title="Link to this heading">¶</a></h2>
+<p>ここ数年、Webは「まずSPA」がデフォになりました。体験は強い。けど個人開発だと、いつの間にか JSの依存・分業前提の設計・初期表示・SEOあたりがじわじわ重くなることがあります。</p>
+<p>SSRは &quot;最新トレンド&quot; ではないかもしれない。でも僕はSSRを、懐古ではなく 「責務の境界を戻す」ための楔として見ています。</p>
+<ul class="simple">
+<li><p>まずHTMLが届く（＝まず見える）</p></li>
+<li><p>画面の初期状態はサーバで決まる（＝状態の出どころが一つ）</p></li>
+<li><p>JSは必要な分だけ（＝保守が軽くなる）</p></li>
+</ul>
+<p>SSRは「フロントの都合で世界を作る」より、「サーバが世界の骨格を握る」感じがして、精神衛生に良い。
+（※もちろんサーバ側の負荷や複雑さが増えるトレードオフはある）</p>
+</section>
+<section id="lambda">
+<h2>&quot;Lambdaだけ&quot;で済むのが正義（個人開発の速度感）<a class="headerlink" href="#lambda" title="Link to this heading">¶</a></h2>
+<p>SSRって「サーバを立てる」印象が強いけど、個人開発だとそこが心理的コストになります。</p>
+<p>そこで AWS Lambda + API Gateway（または Function URL）。
+サーバを持たずにSSRができると、体感として &quot;始める重さ&quot; が一段下がります。</p>
+<p>LitestarはASGIアプリなので、Lambdaのイベント形式に橋渡しする必要があり、ここで Mangum が効きます。Mangumは ASGIアプリを Lambda 上で動かすためのアダプタで、API Gateway / Function URL などに対応しています。</p>
+</section>
+<section id="litestar-jinja2-ssr">
+<h2>Litestar + Jinja2：SSRの&quot;素直さ&quot;がある<a class="headerlink" href="#litestar-jinja2-ssr" title="Link to this heading">¶</a></h2>
+<p>Litestarはテンプレート機構を公式にサポートしていて、Jinja2も「普通に」組み込めます。</p>
+<p>最小の雰囲気（超短縮）：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">litestar</span><span class="w"> </span><span class="kn">import</span> <span class="n">Litestar</span><span class="p">,</span> <span class="n">get</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">litestar.response</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">litestar.contrib.jinja</span><span class="w"> </span><span class="kn">import</span> <span class="n">JinjaTemplateEngine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">litestar.template.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">TemplateConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mangum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mangum</span>
+
+<span class="nd">@get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Template</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;index.html.jinja2&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;msg&quot;</span><span class="p">:</span> <span class="s2">&quot;SSR on Lambda&quot;</span><span class="p">})</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Litestar</span><span class="p">(</span>
+    <span class="n">route_handlers</span><span class="o">=</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+    <span class="n">template_config</span><span class="o">=</span><span class="n">TemplateConfig</span><span class="p">(</span>
+        <span class="n">directory</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;templates&quot;</span><span class="p">,</span>
+        <span class="n">engine</span><span class="o">=</span><span class="n">JinjaTemplateEngine</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">handler</span> <span class="o">=</span> <span class="n">Mangum</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># Lambda handler</span>
+</pre></div>
+</div>
+<p>ここまでで「LambdaのURLを叩いたらHTMLが返る」になります。
+※静的ファイル配信は、S3+CloudFrontへ逃がすのが無難</p>
+</section>
+<section id="htmx">
+<h2>htmxは&quot;簡単に動く&quot;けど&quot;設計が効いてくる&quot;<a class="headerlink" href="#htmx" title="Link to this heading">¶</a></h2>
+<p>SSRで十分に気持ちよくなるんですが、人間の欲望は尽きないので、次に欲しくなるのが部分更新。</p>
+<p>htmxは hx-get でHTMLを取りにいって、DOMに差し替えられる。ここが軽い。
+でも「運用できる設計」にする瞬間、急に難しくなります。</p>
+<p>難しくなるポイント（体感）
+- 境界問題：「どこを&quot;部品&quot;として返すか」が設計になる
+- URL問題：フルページと部分HTMLのURLが増えがち
+- 状態問題：サーバが持つ状態 / DOMの持つ状態がズレやすい
+- 重複問題：全体テンプレと部分テンプレが二重管理になりやすい</p>
+<p>htmxは&quot;JSが減る&quot;代わりに、テンプレ設計の精度が要求される感じがします。</p>
+</section>
+<section id="ai">
+<h2>じゃあAIは使えるのか？<a class="headerlink" href="#ai" title="Link to this heading">¶</a></h2>
+<p>使えます。ただし 「設計が未確定な状態」ではAIも迷子になることが多いです。
+逆に、こちらが&quot;型&quot;を渡すと安定します。</p>
+<p>AIが効く「型」</p>
+<ol class="arabic simple">
+<li><p>命名規約を決めてから渡す</p></li>
+</ol>
+<p>例：
+- templates/pages/<em>.jinja2（フルページ）
+- templates/partials/</em>.jinja2（差し替え用）</p>
+<p>この規約があるだけで、AIに「partialはこれに従って」と言えます。</p>
+<ol class="arabic simple" start="2">
+<li><p>「返していいHTMLの形」を決めてから渡す</p></li>
+</ol>
+<p>例えば「/todos/partial は <cite>&lt;li&gt;...&lt;/li&gt;</cite> の集合だけ返す。<cite>&lt;html&gt;</cite> は返さない」みたいに契約化。
+hx-target で差し替え先が明確になるので、AIも実装しやすいです。</p>
+<ol class="arabic simple" start="3">
+<li><p>&quot;部分レンダリング&quot;の仕組みを用意しておく</p></li>
+</ol>
+<p>Jinja2は普通に書くと「テンプレ丸ごと」レンダリングになりがちです。
+ここで、テンプレのブロック単位をレンダリングできる jinja2-fragments みたいな道具があると、設計が少し楽になります（htmx文脈で「一部だけ返したい」に寄せられる）。</p>
+<p>AIに「このブロックだけ返す設計で」と指定できるようになるのが大きい。</p>
+</section>
+<section id="id1">
+<h2>まとめ：SSRは&quot;古い&quot;んじゃなくて&quot;節度&quot;の技術<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>LambdaだけでSSRを回せると、サーバ管理の気配が消えて、HTMLの素直さが前に出ます。
+一方でhtmxは「簡単に動く」けど「綺麗に育つ」には設計がいる。だからこそAIは、コード生成より 境界・契約・命名規約を固める用途で効く…というのが現時点の結論です。</p>
+<p>SPAが当たり前になった今だからこそ、SSRは回帰じゃなく、現代への楔として書く価値があると思っています。</p>
+</section>
+<section id="id2">
+<h2>参考文献<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.litestar.dev/2/usage/templating.html">Litestar Docs: Templating（Jinja2対応)</a></p></li>
+<li><p><a class="reference external" href="https://github.com/Kludex/mangum">Mangum: ASGI on AWS Lambda（概要）</a></p></li>
+<li><p><a class="reference external" href="https://htmx.org/attributes/hx-get/">htmx Docs: hx-get / hx-target</a></p></li>
+</ul>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+      Previous:
+    
+    <a href="sqlspec-orm.html">
+      
+      <span>PythonでORMを使わずSQL文で快適開発 - SQLSpecによるマイグレーション&CRUD実装</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+      Next: 
+    <a href="../2026/flask-sqlspec-crud.html">
+      <span>FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なDB操作</span>
+      
+    </a>
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる</a><ul>
+<li><a class="reference internal" href="#tl-dr">TL;DR</a></li>
+<li><a class="reference internal" href="#ssr">SSRが&quot;当たり前じゃなくなった&quot;今、なぜやるのか（思想）</a></li>
+<li><a class="reference internal" href="#lambda">&quot;Lambdaだけ&quot;で済むのが正義（個人開発の速度感）</a></li>
+<li><a class="reference internal" href="#litestar-jinja2-ssr">Litestar + Jinja2：SSRの&quot;素直さ&quot;がある</a></li>
+<li><a class="reference internal" href="#htmx">htmxは&quot;簡単に動く&quot;けど&quot;設計が効いてくる&quot;</a></li>
+<li><a class="reference internal" href="#ai">じゃあAIは使えるのか？</a></li>
+<li><a class="reference internal" href="#id1">まとめ：SSRは&quot;古い&quot;んじゃなくて&quot;節度&quot;の技術</a></li>
+<li><a class="reference internal" href="#id2">参考文献</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2025/litestar-ssr-lambda.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">サーバを持たないSSR入門：Litestar + Jinja2 + MangumでLambdaに載せる</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>

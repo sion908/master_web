@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="ja" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sion908.tech/blog/2025/lambda-async-utility.html" />
+<meta property="og:site_name" content="Sion908 Blog" />
+<meta property="og:description" content="はじめに: AWS Lambdaの非同期実行とローカル開発の両立って意外と面倒ですよね。 本記事では、asyncioによるローカル非同期処理と、Lambdaの非同期実行を同じAPIで扱えるユーティリティを作成し、LitestarでAPI化、CDKでデプロイまで自動化した構成を紹介します。 目的・背景: ローカルではasyncioで高速に非同期処理を試したい, 本番はAWS Lambdaでスケ..." />
+<meta name="description" content="はじめに: AWS Lambdaの非同期実行とローカル開発の両立って意外と面倒ですよね。 本記事では、asyncioによるローカル非同期処理と、Lambdaの非同期実行を同じAPIで扱えるユーティリティを作成し、LitestarでAPI化、CDKでデプロイまで自動化した構成を紹介します。 目的・背景: ローカルではasyncioで高速に非同期処理を試したい, 本番はAWS Lambdaでスケ..." />
+
+    <title>AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話 &#8212; Sion908 Blog  ドキュメント</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=2bf1fcf8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx_nekochan.css?v=d73a829b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=4969abbd" />
+    
+    <script src="../../_static/documentation_options.js?v=c033477b"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+     
+    <!-- Google Fonts: Outfit and Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+ 
+<link
+  rel="alternate"
+  type="application/atom+xml"
+  href="../../blog/atom.xml"
+  title="Sion908 Blog"
+/>
+  
+  </head><body>
+   <div class="site-header">
+       <h1>Sion908 Blog</h1>
+       <p>ようこそ！Sion908の技術ブログへ</p>
+       <div class="nav-links">
+           <a href="/" class="nav-link">
+               <i class="fas fa-home"></i>
+               ホーム
+           </a>
+           <a href="https://portfolio.sion908.tech/" class="nav-link">
+               <i class="fas fa-briefcase"></i>
+               ポートフォリオ
+           </a>
+           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
+               <i class="fas fa-book"></i>
+               まめここ
+           </a>
+           <a href="https://slide.sion908.tech/" class="nav-link">
+               <i class="fas fa-presentation"></i>
+               スライド
+           </a>
+       </div>
+   </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話</a></li> 
+      </ul>
+    </div>
+    <div class="premium-wrapper">
+          
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+             <section id="aws-lambda">
+<h1>AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話<a class="headerlink" href="#aws-lambda" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2>はじめに<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>AWS Lambdaの非同期実行とローカル開発の両立って意外と面倒ですよね。
+本記事では、asyncioによるローカル非同期処理と、Lambdaの非同期実行を同じAPIで扱えるユーティリティを作成し、LitestarでAPI化、CDKでデプロイまで自動化した構成を紹介します。</p>
+</section>
+<section id="id2">
+<h2>目的・背景<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>ローカルではasyncioで高速に非同期処理を試したい</p></li>
+<li><p>本番はAWS Lambdaでスケールしたい</p></li>
+<li><p>API設計はモダンなPythonフレームワーク（Litestar）で</p></li>
+<li><p>デプロイ・管理はCDKで自動化したい</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>アーキテクチャ概要<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-------------+       +----------------+       +--------------------+
+| API Gateway |  --&gt;  | API Lambda     |  --&gt;  | Worker Lambda      |
++-------------+       +----------------+       +--------------------+
+         ↑                   |                        |
+         |   (Litestar)      |   (async invoke)       | (async job)
+         +-------------------+------------------------+
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>API Gateway経由でリクエストを受け、API Lambda（Litestarアプリ）で処理</p></li>
+<li><p>非同期ジョブはWorker Lambdaへinvoke</p></li>
+<li><p>ローカルではasyncioで同等の非同期実行</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>ソースコード<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/sion908/async_lambda_local">https://github.com/sion908/async_lambda_local</a></p>
+</section>
+<section id="lambda">
+<h2>ローカル＆Lambda両対応の非同期処理<a class="headerlink" href="#lambda" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a href="#id5"><span class="problematic" id="id6">`</span></a>async_lambda_invoker`デコレータで、ローカル時はasyncio、Lambda時はboto3でinvoke</p></li>
+<li><p>共通APIでどちらでも非同期ジョブをキックできる</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">main</span><span class="w"> </span><span class="kn">import</span> <span class="n">async_lambda_invoker</span>
+
+<span class="nd">@async_lambda_invoker</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process_job</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="c1"># 非同期ジョブ本体</span>
+</pre></div>
+</div>
+</section>
+<section id="litestarapi">
+<h2>LitestarによるAPI実装<a class="headerlink" href="#litestarapi" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><cite>/</cite> でサービスのステータス確認</p></li>
+<li><p><cite>/process</cite> で非同期ジョブをPOST</p></li>
+<li><p>VS Code REST Client用の <cite>api_test.http</cite> で簡単にAPIテスト</p></li>
+</ul>
+</section>
+<section id="aws-cdk">
+<h2>AWS CDKによるデプロイ自動化<a class="headerlink" href="#aws-cdk" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Lambda関数、IAMロール、API Gatewayなど全てCDKで定義</p></li>
+<li><p><cite>manage.sh</cite> で <cite>./manage.sh deploy</cite> するだけで一発デプロイ</p></li>
+<li><p><a href="#id7"><span class="problematic" id="id8">`</span></a>.env`でAWSプロファイルやリージョンを安全に管理</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./manage.sh<span class="w"> </span>deploy
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h2>プロジェクト構成と管理<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><cite>main.py</cite>: 非同期処理ロジックとAPI</p></li>
+<li><p><cite>infra/cdk/</cite>: CDKスタック定義</p></li>
+<li><p><cite>src/lambda/</cite>: Lambdaハンドラー</p></li>
+<li><p><cite>manage.sh</cite>: 統合管理スクリプト</p></li>
+<li><p><cite>.env</cite> &amp; <cite>.env.sample</cite>: 設定ファイル</p></li>
+<li><p><cite>requirements.txt</cite>, <cite>requirements-dev.txt</cite>: 依存関係管理</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>まとめ<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>ローカルとLambdaの両方で同じAPIで非同期処理ができる</p></li>
+<li><p>LitestarでモダンなAPI開発</p></li>
+<li><p>CDKと管理スクリプトでデプロイも超簡単</p></li>
+<li><p>AWSプロファイルも安全に切り替え可能</p></li>
+</ul>
+<p>---</p>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+     
+<div class="section ablog__prev-next">
+  <span class="ablog__prev">
+      Previous:
+    
+    <a href="litestar-polyfactory-geometry.html">
+      
+      <span>litestarのpolyfactoryでGeometryを扱う</span>
+    </a>
+    
+  </span>
+  <span class="ablog__spacer">&nbsp;</span>
+  <span class="ablog__next">
+      Next: 
+    <a href="ai-pair-programming-htmx.html">
+      <span>AIペアプログラミングで体感する未来の開発：Lambda + HTMX で30分ゲーム開発の全記録</span>
+      
+    </a>
+    
+  </span>
+</div>
+  
+</div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../../index.html">目次</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話</a><ul>
+<li><a class="reference internal" href="#id1">はじめに</a></li>
+<li><a class="reference internal" href="#id2">目的・背景</a></li>
+<li><a class="reference internal" href="#id3">アーキテクチャ概要</a></li>
+<li><a class="reference internal" href="#id4">ソースコード</a></li>
+<li><a class="reference internal" href="#lambda">ローカル＆Lambda両対応の非同期処理</a></li>
+<li><a class="reference internal" href="#litestarapi">LitestarによるAPI実装</a></li>
+<li><a class="reference internal" href="#aws-cdk">AWS CDKによるデプロイ自動化</a></li>
+<li><a class="reference internal" href="#id9">プロジェクト構成と管理</a></li>
+<li><a class="reference internal" href="#id10">まとめ</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/blog/2025/lambda-async-utility.rst.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">クイック検索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="検索" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    </div>
+
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Sion908 Blog  ドキュメント</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">AWS Lambdaとローカルで非同期処理をシームレスに実行するユーティリティを作った話</a></li> 
+      </ul>
+    </div>
+   <div class="site-footer">
+       <div class="container">
+           <p style="margin-bottom: 0.5rem;">
+               <a href="../../privacy.html">プライバシーポリシー</a> | 
+               <a href="../../contact.html">お問い合わせ</a>
+           </p>
+           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+       </div>
+   </div>
+
+  </body>
+</html>
