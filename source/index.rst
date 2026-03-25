@@ -66,7 +66,7 @@ Python、Web開発、クラウド技術
 
    <!-- Recent Activity Section -->
    <section class="premium-card activity-section">
-       <div class="card-content">
+       <div class="card-content uni">
            <h3>Recent Activity</h3>
            <ul class="activity-list">
                <li><strong>2026-03</strong> - Flask + SQLSpec 記事公開</li>
