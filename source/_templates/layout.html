@@ -17,34 +17,25 @@
 {% endblock %}
 
 {% block header %}
-   <div class="site-header">
-       <h1>Sion908 Blog</h1>
-       <p>ようこそ！Sion908の技術ブログへ</p>
-       <div class="nav-links">
-           <a href="/" class="nav-link">
-               <i class="fas fa-home"></i>
-               ホーム
+   <header class="site-header sticky-header">
+       <div class="container header-container">
+           <a class="site-logo" href="{{ pathto(master_doc) }}">
+               <h2>Sion908 Blog</h2>
            </a>
-           <a href="https://portfolio.sion908.tech/" class="nav-link">
-               <i class="fas fa-briefcase"></i>
-               ポートフォリオ
-           </a>
-           <a href="https://www.mamekoko.sion908.tech/" class="nav-link">
-               <i class="fas fa-book"></i>
-               まめここ
-           </a>
-           <a href="https://slide.sion908.tech/" class="nav-link">
-               <i class="fas fa-presentation"></i>
-               スライド
-           </a>
-           
-           <!-- Theme Toggle -->
-           <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-               <i class="fas fa-sun icon-sun"></i>
-               <i class="fas fa-moon icon-moon"></i>
-           </button>
+           <div class="header-actions">
+               <nav class="nav-links">
+                   <a href="{{ pathto(master_doc) }}" class="nav-link"><i class="fas fa-home"></i>ホーム</a>
+                   <a href="https://portfolio.sion908.tech/" class="nav-link"><i class="fas fa-briefcase"></i>実績</a>
+                   <a href="https://www.mamekoko.sion908.tech/" class="nav-link"><i class="fas fa-book"></i>まめここ</a>
+                   <a href="https://slide.sion908.tech/" class="nav-link"><i class="fas fa-presentation"></i>スライド</a>
+               </nav>
+               <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+                   <i class="fas fa-sun icon-sun"></i>
+                   <i class="fas fa-moon icon-moon"></i>
+               </button>
+           </div>
        </div>
-   </div>
+   </header>
 
    <!-- Theme Toggle Script -->
    <script>
@@ -63,21 +54,63 @@
    </script>
 {% endblock %}
 
-
 {% block content %}
-    <div class="premium-wrapper">
-        {{ super() }}
-    </div>
+    <main class="main-wrapper">
+        <div class="container content-container">
+            <!-- Left: Main Article Content -->
+            <article class="main-content {% if pagename != 'index' %}premium-card{% endif %}">
+                {{ super() }}
+            </article>
+
+            <!-- Right: Table of Contents (Desktop Only) -->
+            {% if display_toc %}
+            <aside class="sidebar-toc">
+                <div class="toc-wrapper">
+                    <div class="toc-header">
+                        <i class="fas fa-list"></i> 目次 / Index
+                    </div>
+                    <div class="toc-content">
+                        {{ toc }}
+                    </div>
+                </div>
+            </aside>
+            {% else %}
+            <!-- Try to capture local toc anyway if not root -->
+            {% if pagename != 'index' and toc %}
+            <aside class="sidebar-toc">
+                <div class="toc-wrapper">
+                    <div class="toc-header">
+                        <i class="fas fa-list"></i> 目次 / Index
+                    </div>
+                    <div class="toc-content">
+                        {{ toc }}
+                    </div>
+                </div>
+            </aside>
+            {% endif %}
+            {% endif %}
+        </div>
+    </main>
 {% endblock %}
 
 {% block footer %}
-   <div class="site-footer">
-       <div class="container">
-           <p style="margin-bottom: 0.5rem;">
-               <a href="{{ pathto('privacy') }}">プライバシーポリシー</a> | 
+   <footer class="site-footer">
+       <div class="container footer-container">
+           <div class="footer-links">
+               <a href="{{ pathto('privacy') }}">プライバシーポリシー</a>
                <a href="{{ pathto('contact') }}">お問い合わせ</a>
-           </p>
-           <p>© 2026 sion908.tech | Built with ❤️ and Sphinx</p>
+           </div>
+           <div class="footer-social">
+               <a href="https://twitter.com/sion908" target="_blank" aria-label="Twitter">
+                   <i class="fab fa-twitter"></i>
+               </a>
+               <a href="https://github.com/sion908" target="_blank" aria-label="GitHub">
+                   <i class="fab fa-github"></i>
+               </a>
+           </div>
+           <div class="footer-copy">
+               <span>&copy; {{ copyright }} sion908.tech. All rights reserved.</span>
+           </div>
        </div>
-   </div>
+   </footer>
 {% endblock %}
