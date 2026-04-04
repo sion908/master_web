@@ -1,4 +1,4 @@
-# Sion908 Blog (Portal & Blog)
+# sion908 lab Blog (Portal & Blog)
 
 Sphinxベースのプレミアムなポータル・技術ブログサイトです。
 グラスモーフィズム（Glassmorphism）を採用した独自のモダンデザインにより、個人ポータルとABlogによる技術発信を統合しています。

@@ -6,8 +6,8 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Sion908 Blog'
-copyright = '2026, sion908'
+project = 'sion908 lab Blog'
+copyright = '2026, sion908 lab'
 author = 'sion908'
 
 # -- General configuration ---------------------------------------------------
