@@ -2,11 +2,46 @@
 
 {% block extrahead %}
     {{ super() }}
+    <!-- Canonical URL -->
+    {% if page_url %}
+    <link rel="canonical" href="{{ page_url }}">
+    {% endif %}
+
+    <!-- Structured Data (JSON-LD) for Blog Posts -->
+    {% if pagename and pagename.startswith('blog/') %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "{{ title if title else doc.title if doc else '' }}",
+      "url": "{{ page_url if page_url else '' }}",
+      "datePublished": "{{ doc.date if doc else '' }}",
+      "author": {
+        "@type": "Person",
+        "name": "{{ author if author else 'sion908' }}"
+      }
+    }
+    </script>
+    {% endif %}
+
+    <!-- Open Graph Meta Tags -->
+    {% if page_url %}
+    <meta property="og:url" content="{{ page_url }}">
+    {% endif %}
+    <meta property="og:title" content="{{ title if title else doc.title if doc else 'Sion908 Blog' }}">
+    <meta property="og:description" content="{{ meta.get('description', 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。') }}">
+    <meta property="og:type" content="{% if pagename and pagename.startswith('blog/') %}article{% else %}website{% endif %}">
+    <meta property="og:site_name" content="Sion908 Blog">
+    {% if meta.get('og:image') %}
+    <meta property="og:image" content="{{ meta.get('og:image') }}">
+    {% endif %}
+    <meta property="og:locale" content="ja_JP">
+
     <!-- Google Fonts: Outfit and Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <!-- Initial Theme Check (Prevent FOUC) -->
     <script>
         (function() {
