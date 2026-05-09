@@ -29,10 +29,10 @@
     <meta property="og:url" content="{{ page_url }}">
     {% endif %}
     <meta property="og:title" content="{{ title if title else doc.title if doc else 'Sion908 Blog' }}">
-    <meta property="og:description" content="{{ meta.get('description', 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。') }}">
+    <meta property="og:description" content="{{ (meta or {}).get('description', 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。') }}">
     <meta property="og:type" content="{% if pagename and pagename.startswith('blog/') %}article{% else %}website{% endif %}">
     <meta property="og:site_name" content="Sion908 Blog">
-    {% if meta.get('og:image') %}
+    {% if meta and meta.get('og:image') %}
     <meta property="og:image" content="{{ meta.get('og:image') }}">
     {% endif %}
     <meta property="og:locale" content="ja_JP">
@@ -76,14 +76,24 @@
    <script>
        document.addEventListener('DOMContentLoaded', () => {
            const toggle = document.getElementById('theme-toggle');
-           if (!toggle) return;
+           if (toggle) {
+               toggle.addEventListener('click', () => {
+                   const currentTheme = document.documentElement.getAttribute('data-theme');
+                   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                   document.documentElement.setAttribute('data-theme', newTheme);
+                   localStorage.setItem('theme', newTheme);
+               });
+           }
 
-           toggle.addEventListener('click', () => {
-               const currentTheme = document.documentElement.getAttribute('data-theme');
-               const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-               
-               document.documentElement.setAttribute('data-theme', newTheme);
-               localStorage.setItem('theme', newTheme);
+           // Active nav link
+           const currentPath = window.location.pathname;
+           document.querySelectorAll('.nav-link').forEach(link => {
+               const href = link.getAttribute('href');
+               if (!href) return;
+               const linkPath = new URL(href, window.location.origin).pathname;
+               if (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+                   link.classList.add('active');
+               }
            });
        });
    </script>
@@ -91,7 +101,7 @@
 
 {% block content %}
     <main class="main-wrapper">
-        <div class="container content-container">
+        <div class="container content-container {% if pagename == 'index' %}no-sidebar{% endif %}">
             <!-- Left: Main Article Content -->
             <article class="main-content {% if pagename != 'index' %}premium-card{% endif %}">
                 {{ super() }}
