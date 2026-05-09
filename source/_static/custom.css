@@ -80,6 +80,7 @@ a {
     color: var(--primary-color);
     text-decoration: none;
     transition: color var(--transition-speed) ease, filter var(--transition-speed) ease;
+    word-break: break-all; /* 追加: 長いURLの折り返しに対応 */
 }
 a:visited {
     color: var(--visited-color);
@@ -135,6 +136,10 @@ div.document, div.bodywrapper, div.body {
     grid-template-columns: minmax(0, 1fr) 300px;
     gap: 3rem;
     align-items: start;
+}
+
+.content-container.no-sidebar {
+    grid-template-columns: 1fr;
 }
 
 /* Premium Card Style (Content Box) */
@@ -219,9 +224,14 @@ div.document, div.bodywrapper, div.body {
 .nav-link i {
     font-size: 1rem;
 }
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
     color: var(--primary-color) !important;
     text-decoration: none;
+}
+.nav-link.active {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 2px;
 }
 
 .theme-toggle {
@@ -383,6 +393,8 @@ div.document, div.bodywrapper, div.body {
 .main-content p {
     margin-bottom: 1.5rem;
     color: var(--text-primary);
+    text-align: left; /* 追加: justifyによる文字間隔の不自然な広がりを防止 */
+    overflow-wrap: break-word;
 }
 .main-content ul, .main-content ol {
     margin-bottom: 1.5rem;
@@ -390,6 +402,8 @@ div.document, div.bodywrapper, div.body {
 }
 .main-content li {
     margin-bottom: 0.5rem;
+    text-align: left; /* 追加: justifyによる文字間隔の不自然な広がりを防止 */
+    overflow-wrap: break-word;
 }
 .main-content img {
     max-width: 100%;
@@ -434,17 +448,27 @@ div.admonition p.last {
 /* Code Blocks */
 div.highlight {
     background: #f1f5f9 !important; /* Slate 100 for light mode syntax contrast */
-    color: var(--text-primary);
+    color: #1e293b;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     overflow: hidden;
     margin-bottom: 1.5rem;
+    position: relative;
+}
+div.highlight::before {
+    content: '';
+    display: block;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 div.highlight pre {
     padding: 1rem 1.5rem;
-    color: inherit !important;
+    color: #1e293b !important;
     background: transparent !important;
     overflow-x: auto;
+    font-size: 0.9rem;
+    line-height: 1.65;
 }
 
 /* Inline Code */
@@ -511,13 +535,57 @@ table.docutils td {
 .services-grid {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 .service-item {
     background: var(--bg-body);
     border: 1px solid var(--border-color);
-    padding: 1.5rem;
+    padding: 1rem 1.25rem;
     border-radius: var(--radius-md);
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    grid-template-rows: auto auto auto;
+    column-gap: 0.75rem;
+    align-items: start;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+.service-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+.service-item > i {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    margin-top: 0.2rem;
+}
+.service-item > h4 {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0 0 0.25rem 0 !important;
+    font-size: 1rem !important;
+    color: var(--text-primary);
+}
+.service-item > p {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+.service-item > a {
+    grid-column: 2;
+    grid-row: 3;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* CTA Section */
+.cta-section {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
 }
 
 .btn-outline, .btn-primary {
