@@ -64,16 +64,12 @@ Python、Web開発、クラウド技術
        </a>
    </div>
 
-   <!-- Recent Activity Section -->
-   <section class="premium-card activity-section">
-       <div class="card-content uni">
-           <h3>Recent Activity</h3>
-           <ul class="activity-list">
-               <li><strong>2026-03</strong> - Flask + SQLSpec 記事公開</li>
-               <li><strong>2025-12</strong> - AIペアプログラミング体験記事</li>
-               <li><strong>2025-11</strong> - SQLSpec詳細解説記事</li>
-               <li><strong>2025-07</strong> - XServer SSL設定記事</li>
-           </ul>
-       </div>
-   </section>
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+   :hidden:
+
+   blog
+   contact
+   privacy
 

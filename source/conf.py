@@ -19,8 +19,6 @@ extensions = [
     'sphinxemoji.sphinxemoji',
     'sphinxext.opengraph',
     'sphinx_nekochan',
-    'pymdownx.superfences',
-    'pymdownx.highlight',
 ]
 
 templates_path = ['_templates']
@@ -56,6 +54,12 @@ html_css_files.append('custom.css')
 # OpenGraph configuration
 ogp_site_url = 'https://sion908.tech'
 ogp_description = 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。'
+ogp_social_cards = {
+    "enable": True,
+    "image_mini": "./_static/sion_rounded.png", # 右下のデフォルトロゴ(目)を独自の画像(角丸)に置き換え
+    "font": "Hiragino Sans", # macOS内蔵の日本語フォントを指定
+    "line_color": "#968ABD", # アクセントラインの色
+}
 
 # sphinx-nekochan フッター設定
 nekochan_footer = {
@@ -70,3 +74,20 @@ fontawesome = {
     'twitter': 'fab fa-twitter',
     'linkedin': 'fab fa-linkedin',
 }
+
+# --- Monkey Patch for sphinxext-opengraph ---
+# OGPソーシャルカードで本文の代わりに meta description を使うようにする
+import docutils.nodes
+import sphinxext.opengraph._description_parser as ogp_desc
+
+original_get_desc = ogp_desc.get_description
+
+def custom_get_description(doctree, length, known_titles):
+    # .. meta:: ディレクティブの description を優先的に取得
+    for node in doctree.traverse(docutils.nodes.meta):
+        if node.get('name') == 'description':
+            return node.get('content')
+    # なければ元の挙動（本文からの抽出）にフォールバック
+    return original_get_desc(doctree, length, known_titles)
+
+ogp_desc.get_description = custom_get_description
