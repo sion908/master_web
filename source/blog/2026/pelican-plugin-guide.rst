@@ -85,25 +85,25 @@ SEO / サイト構造
 
 **sitemap**
 
-XML sitemap生成。SEOやクローラー向け。
+XML sitemapを自動生成するプラグイン。検索エンジンのクローラーに対してサイトの構造や記事の更新頻度を適切に伝えるために必須のプラグインです。優先度（priority）や更新頻度（changefreq）の細かい設定も可能です。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/sitemap
 
 **neighbors**
 
-前後記事リンク（「前の記事」「次の記事」）。
+記事の末尾などに「前の記事」「次の記事」といったリンクを生成するための変数（ ``next_article`` / ``prev_article`` ）を提供します。読者の回遊率向上に役立ちます。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/neighbors
 
 **related-posts**
 
-関連記事生成。
+記事のタグやカテゴリなどを解析し、関連する記事のリストを自動生成します。記事を読み終えた読者に次のコンテンツを提示し、サイトの直帰率を下げるのに効果的です。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/related_posts
 
 **series**
 
-記事シリーズ化。
+複数の記事を「シリーズ」としてまとめる機能を提供します。連載記事やチュートリアルなどを書く際に、自動でシリーズ内の他の記事へのリンク一覧を出力してくれるため便利です。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/series
 
@@ -112,7 +112,7 @@ Markdown / 執筆支援
 
 **liquid_tags**
 
-有名プラグイン。YouTube、Vimeo、notebook、embedに対応。
+Jinjaのタグに似た記法で、YouTube動画、Vimeo、Jupyter Notebook、その他外部リソースを記事内に簡単に埋め込めるようにする非常に強力で多機能なプラグインです。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/liquid_tags
 
@@ -124,7 +124,7 @@ Markdown / 執筆支援
 
 **code_include**
 
-外部コード埋め込み。
+外部のソースコードファイルを指定して、その内容を記事内にインクルードする機能です。コードの断片をコピペせずに済むため、ソースコード自体を別ファイルとしてGitなどで管理・テストしやすくなります。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/code_include
 
@@ -136,13 +136,13 @@ Markdown / 執筆支援
 
 **pelican-toc**
 
-Table of Contents自動生成。
+Markdownのヘッダー要素（h1, h2, h3など）から目次（Table of Contents）を抽出し、記事内の好きな場所やサイドバーに配置できるようにします。長文の技術記事には欠かせません。
 
 - GitHub: https://github.com/ingwinlu/pelican-toc
 
 **better_code_samples**
 
-コードブロック改善。
+デフォルトのコードブロックのハイライトや行番号表示などの挙動を改善し、より見やすい技術記事を作成するためのプラグインです。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/better_code_samples
 
@@ -151,20 +151,20 @@ Table of Contents自動生成。
 
 **webassets**
 
-重要プラグイン。CSS minify、JS minify、Sass、Less、fingerprint/hashに対応。
+フロントエンドのビルドパイプラインをPelicanに統合する強力なプラグインです。CSS/JSのMinify、SassやLessのコンパイル、さらにはキャッシュバスティングのためのファイル名へのハッシュ付与（fingerprinting）まで対応します。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/assets
 - webassets docs: https://webassets.readthedocs.io/
 
 **minify**
 
-HTML/CSS/JS圧縮。
+ビルド出力されたHTML、CSS、JSファイルから不要な空白や改行を削除し、ファイルサイズを極限まで圧縮します。サイトの読み込み速度（パフォーマンス）を向上させるために有効です。
 
 - PyPI: https://pypi.org/project/pelican-minify/
 
 **gzip_cache**
 
-gzip事前生成。
+ビルド時に、あらかじめgzip圧縮されたファイル（.html.gz、.css.gzなど）を生成しておくプラグインです。NginxなどのWebサーバー側の設定と組み合わせることで、動的圧縮のCPU負荷を下げつつ高速な配信が可能になります。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/gzip_cache
 
@@ -173,25 +173,25 @@ UX / ブログ機能
 
 **summary**
 
-記事summary自動生成。
+記事の冒頭部分や、指定した特定の区切り文字までの内容を抽出し、記事一覧ページなどで表示するための要約（サマリー）を自動生成します。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/summary
 
 **readtime**
 
-「5 min read」表示。
+記事の文字数や単語数から「この記事を読むのにかかる時間（例: 5 min read）」を算出して表示します。Mediumなどのモダンなブログプラットフォームでよく見られる、読者の利便性を上げる機能です。
 
 - GitHub: https://github.com/pelican-plugins/readtime
 
 **tag_cloud**
 
-タグクラウド生成。
+サイト内で使用されているすべてのタグを集計し、使用頻度に応じた文字サイズで表示するタグクラウドを生成します。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/tag_cloud
 
 **share_post**
 
-SNS共有リンク生成。
+Twitter（X）、Facebook、はてなブックマーク、LinkedInなどの各種SNS共有リンク（シェアボタン）用のURLを生成します。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/share_post
 
@@ -200,25 +200,25 @@ SNS共有リンク生成。
 
 **photos**
 
-画像ギャラリー。
+記事内に美しい画像ギャラリーを構築するためのプラグインです。複数の画像を綺麗に整列させて表示したい場合に使用します。
 
 - GitHub: https://github.com/pelican-plugins/photos
 
 **thumbnailer**
 
-サムネ自動生成。
+記事内で使用する元の大きな画像から、自動的に複数の指定サイズのサムネイル画像をビルド時に生成します。ページの読み込み速度最適化に役立ちます。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/thumbnailer
 
 **pelican_youtube**
 
-YouTube embedding。
+YouTube動画のURLやIDを指定するだけで、レスポンシブ対応（画面サイズに合わせて伸縮する）した動画プレイヤーを記事内に簡単に埋め込むことができます。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/youtube
 
 **pelican_vimeo**
 
-Vimeo embedding。
+Vimeo動画の埋め込みを簡単に行うためのプラグインです。機能としては ``pelican_youtube`` のVimeo版に相当します。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/vimeo
 
@@ -227,13 +227,13 @@ Notebook / データ分析
 
 **ipynb**
 
-Jupyter Notebook対応。
+Jupyter Notebookファイル（.ipynb）をそのままPelicanの記事としてビルドし、HTMLとしてレンダリングできるようにします。コードとその実行結果、グラフなどをそのままブログ化できるため、データサイエンティストなどに非常に人気があります。
 
 - GitHub: https://github.com/danielfrg/pelican-ipynb
 
 **asciidoc_reader**
 
-AsciiDoc対応。
+MarkdownやreStructuredTextだけでなく、AsciiDoc形式で書かれたドキュメントをパースしてHTMLに変換するためのリーダープラグインです。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/asciidoc_reader
 
@@ -242,13 +242,13 @@ AsciiDoc対応。
 
 **i18n_subsites**
 
-多言語サイト対応。
+Pelicanで本格的な多言語サイト（例: 日本語版と英語版）を構築するための公式推奨プラグインです。言語ごとにサブサイトを生成し、言語間のリンクや設定の切り替えを管理します。
 
 - GitHub: https://github.com/pelican-plugins/i18n_subsites
 
 **backref_translate**
 
-翻訳記事対応。
+ある言語で書かれた記事に対して、別の言語の翻訳記事が存在する場合に、互いの記事へ相互リンクを自動的に張る機能を提供します。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/backlink_translate
 
@@ -257,19 +257,19 @@ AsciiDoc対応。
 
 **pelican_comment_system**
 
-静的サイト向けコメント。
+Disqusなどの外部サービスに依存せず、静的なファイル（Markdownなど）ベースでコメントシステムを構築するためのプラグインです。
 
 - GitHub: https://github.com/pelican-plugins/comment-system
 
 **github_activity**
 
-GitHub activity表示。
+指定したGitHubユーザーのアクティビティ（コミット、Issue作成、Pull Requestなど）をAPI経由で取得し、サイドバーなどにタイムラインとして表示します。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/github_activity
 
 **gravatar**
 
-Gravatar表示。
+メールアドレスからGravatarのプロフィール画像を取得し、著者情報などとともにアイコンとして表示するためのプラグインです。
 
 - 旧プラグイン: https://github.com/getpelican/pelican-plugins/tree/master/gravatar
 
