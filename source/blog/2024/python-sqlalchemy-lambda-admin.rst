@@ -7,6 +7,9 @@ python+sqlalchemy+lambdaで管理者画面を作る
    :language: ja
    :location: blog/2024
 
+.. meta::
+   :description: litestar+sqlalchemy+lambdaのAPIにsqladminを使って管理者画面を追加。jinja2のフルレンダリングをhtmxで最適化し、lambda+cognitoでセキュアに運用する方法。
+
 背景
 ----
 

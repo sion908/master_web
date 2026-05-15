@@ -7,6 +7,9 @@
    :language: ja
    :location: blog/2025
 
+.. meta::
+   :description: SSRの現代的な価値を見直し、Litestar+Jinja2+MangumでLambda上にサーバーレスSSR環境を構築した実践記録。
+
 TL;DR
 -----
 

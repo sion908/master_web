@@ -7,6 +7,9 @@ AIペアプログラミングで体感する未来の開発：Lambda + HTMX で3
    :language: ja
    :location: blog/2025
 
+.. meta::
+   :description: AmazonQ DeveloperのAIペアプログラミング機能を使って、HTMX+Lambdaでタイミングベースクリッカーゲームを30分で開発した全記録。
+
 はじめに：開発革命の実体験
 --------------------------
 

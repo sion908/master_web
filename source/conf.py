@@ -54,11 +54,14 @@ html_css_files.append('custom.css')
 # OpenGraph configuration
 ogp_site_url = 'https://sion908.tech'
 ogp_description = 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。'
+ogp_description_length = 200  # 本文からの抽出文字数（:og:description:がある場合は無視されるはず）
 ogp_social_cards = {
     "enable": True,
     "image_mini": "./_static/sion_rounded.png", # 右下のデフォルトロゴ(目)を独自の画像(角丸)に置き換え
     "font": "Hiragino Sans", # macOS内蔵の日本語フォントを指定
     "line_color": "#968ABD", # アクセントラインの色
+    "description_max_length": 160, # 説明文の最大文字数（はみ出し防止）
+    "page_title_max_length": 60, # ページタイトルの最大文字数（はみ出し防止）
 }
 
 # sphinx-nekochan フッター設定
@@ -76,9 +79,13 @@ fontawesome = {
 }
 
 # --- Monkey Patch for sphinxext-opengraph ---
-# OGPソーシャルカードで本文の代わりに meta description を使うようにする
+# OGPソーシャルカード（PNG画像）と og:description のテキストを
+# 本文ではなく .. meta:: :description: から取得するように差し替える。
+# __init__.py は起動時に `from ._description_parser import get_description` で
+# ローカル変数に束縛するため、モジュール側だけでなく __init__ 側も差し替える。
 import docutils.nodes
 import sphinxext.opengraph._description_parser as ogp_desc
+import sphinxext.opengraph as ogp_init
 
 original_get_desc = ogp_desc.get_description
 
@@ -90,4 +97,6 @@ def custom_get_description(doctree, length, known_titles):
     # なければ元の挙動（本文からの抽出）にフォールバック
     return original_get_desc(doctree, length, known_titles)
 
+# モジュールの参照とその利用元の両方を置き換える
 ogp_desc.get_description = custom_get_description
+ogp_init.get_description = custom_get_description

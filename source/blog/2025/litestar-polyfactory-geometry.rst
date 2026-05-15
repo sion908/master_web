@@ -7,6 +7,9 @@ litestarのpolyfactoryでGeometryを扱う
    :language: ja
    :location: blog/2025
 
+.. meta::
+   :description: litestar+sqlalchemyのアプリでテスト用モックデータ生成にpolyfactoryを使用。geoalchemy2のGeometry型データ生成の手順と工夫点を解説します。
+
 はじめに
 --------
 

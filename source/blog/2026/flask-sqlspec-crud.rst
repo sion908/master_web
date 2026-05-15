@@ -7,6 +7,9 @@ FlaskでSQLSpecを使ったCRUDアプリ実装 - ORMを使わずに型安全なD
    :language: ja
    :location: blog/2026
 
+.. meta::
+   :description: FlaskでSQLSpecを使ってORMなしに型安全なDB操作を実現する方法を解説。生SQLを書きながらもPydanticによる型安全性を保てるSQLSpecの使い方を紹介します。
+
 はじめに
 --------
 

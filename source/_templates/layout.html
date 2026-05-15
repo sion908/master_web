@@ -29,7 +29,7 @@
     <meta property="og:url" content="{{ page_url }}">
     {% endif %}
     <meta property="og:title" content="{{ title if title else doc.title if doc else 'Sion908 Blog' }}">
-    <meta property="og:description" content="{{ (meta or {}).get('description', 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。') }}">
+    <meta property="og:description" content="{{ doc.description if doc and doc.description else (meta or {}).get('description', 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。') }}">
     <meta property="og:type" content="{% if pagename and pagename.startswith('blog/') %}article{% else %}website{% endif %}">
     <meta property="og:site_name" content="Sion908 Blog">
     {% if meta and meta.get('og:image') %}
@@ -47,6 +47,15 @@
         (function() {
             const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             document.documentElement.setAttribute('data-theme', theme);
+        })();
+
+        // OGP descriptionをmeta descriptionで上書き
+        (function() {
+            const metaDescription = document.querySelector('meta[name="description"]');
+            const ogDescription = document.querySelector('meta[property="og:description"]');
+            if (metaDescription && ogDescription && metaDescription.content) {
+                ogDescription.content = metaDescription.content;
+            }
         })();
     </script>
 {% endblock %}
