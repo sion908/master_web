@@ -37,6 +37,15 @@
     {% endif %}
     <meta property="og:locale" content="ja_JP">
 
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@sion908">
+    <meta name="twitter:title" content="{{ title if title else doc.title if doc else 'Sion908 Blog' }}">
+    <meta name="twitter:description" content="{{ doc.description if doc and doc.description else (meta or {}).get('description', 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。') }}">
+    {% if meta and meta.get('og-image') %}
+    <meta name="twitter:image" content="{{ meta.get('og-image') }}">
+    {% endif %}
+
     <!-- Google Fonts: Outfit and Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Font Awesome -->

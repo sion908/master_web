@@ -80,7 +80,6 @@ ogp_social_cards = {
     "line_color": "#968ABD", # アクセントラインの色
     "description_max_length": 160, # 説明文の最大文字数（はみ出し防止）
     "page_title_max_length": 60, # ページタイトルの最大文字数（はみ出し防止）
-    "twitter_card": True, # Twitterカードを有効化
 }
 
 # sphinx-nekochan フッター設定
