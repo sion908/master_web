@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "sphinx>=9.0.0,<10.0.0" "ablog>=0.11.13" "sphinx-design>=0.7.0" "sphinxemoji>=0.3.1" "sphinxext-opengraph>=0.13.0" "sphinx-nekochan>=0.4.0" "pymdown-extensions>=10.0" "playwright"
+          pip install "sphinx>=9.0.0,<10.0.0" "ablog>=0.11.13" "sphinx-design>=0.7.0" "sphinxemoji>=0.3.1" "sphinxext-opengraph>=0.13.0" "sphinx-nekochan>=0.4.0" "pymdown-extensions>=10.0" "playwright" "matplotlib>=3.8.0"
           playwright install chromium
 
       - name: Build HTML
