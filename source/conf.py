@@ -55,10 +55,28 @@ html_css_files.append('custom.css')
 ogp_site_url = 'https://sion908.tech'
 ogp_description = 'Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。'
 ogp_description_length = 200  # 本文からの抽出文字数（:og:description:がある場合は無視されるはず）
+
+# matplotlibに日本語フォントを登録
+import os
+from pathlib import Path
+import matplotlib.font_manager as fm
+
+# フォントファイルの絶対パスを取得
+font_path = Path(__file__).parent / "_static" / "fonts" / "HackGen35-Regular.ttf"
+if font_path.exists():
+    # matplotlibにフォントを登録
+    fm.fontManager.addfont(str(font_path))
+    # フォントファミリ名を取得
+    font_prop = fm.FontProperties(fname=str(font_path))
+    font_family = font_prop.get_name()
+else:
+    # フォントが見つからない場合はフォールバック
+    font_family = "DejaVu Sans"
+
 ogp_social_cards = {
     "enable": True,
     "image_mini": "./_static/sion_rounded.png", # 右下のデフォルトロゴ(目)を独自の画像(角丸)に置き換え
-    "font": "Hiragino Sans", # macOS内蔵の日本語フォントを指定
+    "font": font_family, # matplotlibに登録したフォントファミリ名を使用
     "line_color": "#968ABD", # アクセントラインの色
     "description_max_length": 160, # 説明文の最大文字数（はみ出し防止）
     "page_title_max_length": 60, # ページタイトルの最大文字数（はみ出し防止）

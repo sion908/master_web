@@ -67,7 +67,7 @@ LitestarによるAPI実装
 - VS Code REST Client用の `api_test.http` で簡単にAPIテスト
 
 AWS CDKによるデプロイ自動化
---------------------------
+---------------
 
 - Lambda関数、IAMロール、API Gatewayなど全てCDKで定義
 - ``manage.sh`` で ``./manage.sh deploy`` するだけで一発デプロイ
