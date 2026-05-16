@@ -168,6 +168,27 @@ div.document, div.bodywrapper, div.body {
     }
 }
 
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    .premium-card {
+        padding: 1.5rem 1rem;
+    }
+    .main-wrapper {
+        padding: 2rem 0 4rem 0;
+    }
+    .main-content h1 {
+        font-size: 1.5rem !important;
+    }
+    .main-content h2 {
+        font-size: 1.25rem !important;
+    }
+    .main-content h3 {
+        font-size: 1.1rem !important;
+    }
+}
+
 /* =========================================
    4. Header Styles
    ========================================= */
@@ -259,9 +280,92 @@ div.document, div.bodywrapper, div.body {
 [data-theme='dark'] .theme-toggle .icon-sun { display: block; }
 [data-theme='dark'] .theme-toggle .icon-moon { display: none; }
 
+/* Hide hamburger menu on desktop */
+.hamburger-toggle {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .nav-links span {
         display: none; /* Hide text, show only icons on mobile */
+    }
+
+    /* Hamburger Menu Button */
+    .hamburger-toggle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        background: var(--bg-body);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 8px;
+        gap: 5px;
+        transition: all var(--transition-speed) ease;
+    }
+    .hamburger-toggle span {
+        display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--text-primary);
+        border-radius: 2px;
+        transition: all var(--transition-speed) ease;
+    }
+    .hamburger-toggle:hover {
+        background: var(--primary-light);
+        border-color: var(--primary-color);
+    }
+    .hamburger-toggle:hover span {
+        background: var(--primary-color);
+    }
+    .hamburger-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    .hamburger-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    /* Mobile Navigation Menu */
+    .nav-links {
+        position: fixed;
+        top: 5rem;
+        left: 0;
+        right: 0;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-speed) ease;
+        z-index: 40;
+    }
+    .nav-links.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    .nav-links .nav-link {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .nav-links .nav-link:last-child {
+        border-bottom: none;
+    }
+    .nav-links .nav-link span {
+        display: inline;
     }
 }
 
@@ -375,20 +479,25 @@ div.document, div.bodywrapper, div.body {
    7. Typography & Content Rendering (Markdown/RST)
    ========================================= */
 .main-content h1 {
-    font-size: 2.5rem !important;
-    margin-top: 0;
+    font-size: 2rem !important;
+    margin: 0 0 1.5rem 0 !important;
     padding: 0 !important;
     border: none !important;
+    line-height: 1.2;
 }
-.main-content h2 { 
-    font-size: 1.8rem !important; 
-    padding: 0 0 0.5rem 0 !important; 
-    border-bottom: 2px solid var(--border-color) !important; 
-}
-.main-content h3 { 
+.main-content h2 {
     font-size: 1.5rem !important;
+    margin: 2.5rem 0 1rem 0 !important;
+    padding: 0 0 0.75rem 0 !important;
+    border-bottom: 2px solid var(--border-color) !important;
+    line-height: 1.3;
+}
+.main-content h3 {
+    font-size: 1.25rem !important;
+    margin: 2rem 0 0.75rem 0 !important;
     padding: 0 !important;
     border: none !important;
+    line-height: 1.4;
 }
 .main-content p {
     margin-bottom: 1.5rem;

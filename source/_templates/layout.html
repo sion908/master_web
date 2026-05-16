@@ -76,15 +76,20 @@
                <h2>Sion908 Blog</h2>
            </a>
            <div class="header-actions">
-               <nav class="nav-links">
-                   <a href="{{ pathto(master_doc) }}" class="nav-link"><i class="fas fa-home"></i>ホーム</a>
-                   <a href="https://portfolio.sion908.tech/" class="nav-link"><i class="fas fa-briefcase"></i>実績</a>
-                   <a href="https://www.mamekoko.sion908.tech/" class="nav-link"><i class="fas fa-book"></i>まめここ</a>
-                   <a href="https://slide.sion908.tech/" class="nav-link"><i class="fas fa-presentation"></i>スライド</a>
+               <nav class="nav-links" id="nav-links">
+                   <a href="{{ pathto(master_doc) }}" class="nav-link"><i class="fas fa-home"></i><span>ホーム</span></a>
+                   <a href="https://portfolio.sion908.tech/" class="nav-link"><i class="fas fa-briefcase"></i><span>実績</span></a>
+                   <a href="https://www.mamekoko.sion908.tech/" class="nav-link"><i class="fas fa-book"></i><span>まめここ</span></a>
+                   <a href="https://slide.sion908.tech/" class="nav-link"><i class="fas fa-presentation"></i><span>スライド</span></a>
                </nav>
                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
                    <i class="fas fa-sun icon-sun"></i>
                    <i class="fas fa-moon icon-moon"></i>
+               </button>
+               <button id="hamburger-toggle" class="hamburger-toggle" aria-label="Toggle menu">
+                   <span></span>
+                   <span></span>
+                   <span></span>
                </button>
            </div>
        </div>
@@ -100,6 +105,32 @@
                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                    document.documentElement.setAttribute('data-theme', newTheme);
                    localStorage.setItem('theme', newTheme);
+               });
+           }
+
+           // Hamburger menu toggle
+           const hamburgerToggle = document.getElementById('hamburger-toggle');
+           const navLinks = document.getElementById('nav-links');
+           if (hamburgerToggle && navLinks) {
+               hamburgerToggle.addEventListener('click', () => {
+                   hamburgerToggle.classList.toggle('active');
+                   navLinks.classList.toggle('active');
+               });
+
+               // Close menu when clicking on a nav link
+               navLinks.querySelectorAll('.nav-link').forEach(link => {
+                   link.addEventListener('click', () => {
+                       hamburgerToggle.classList.remove('active');
+                       navLinks.classList.remove('active');
+                   });
+               });
+
+               // Close menu when clicking outside
+               document.addEventListener('click', (e) => {
+                   if (!hamburgerToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                       hamburgerToggle.classList.remove('active');
+                       navLinks.classList.remove('active');
+                   }
                });
            }
 

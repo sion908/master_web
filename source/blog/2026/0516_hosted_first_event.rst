@@ -31,6 +31,8 @@ NaITE LT会
 
    <iframe src="https://slide.sion908.tech/260515_naite_lt/index.html" width="100%" height="450" frameborder="0" allowfullscreen loading="lazy" style="border: 1px solid #ddd; border-radius: 8px;"></iframe>
 
+* `別タブや全画面で開く <https://slide.sion908.tech/260515_naite_lt/index.html>`_
+
 のように、会の目的とloggerの話をしました。
 
 要約
