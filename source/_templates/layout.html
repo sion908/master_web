@@ -56,6 +56,13 @@
         (function() {
             const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             document.documentElement.setAttribute('data-theme', theme);
+
+            // Twitter埋め込みのdata-themeも初期設定
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.twitter-tweet').forEach(tweet => {
+                    tweet.setAttribute('data-theme', theme);
+                });
+            });
         })();
 
         // OGP descriptionをmeta descriptionで上書き
@@ -105,6 +112,11 @@
                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                    document.documentElement.setAttribute('data-theme', newTheme);
                    localStorage.setItem('theme', newTheme);
+
+                   // Twitter埋め込みのdata-theme属性も更新
+                   document.querySelectorAll('.twitter-tweet').forEach(tweet => {
+                       tweet.setAttribute('data-theme', newTheme);
+                   });
                });
            }
 
@@ -154,6 +166,25 @@
             <!-- Left: Main Article Content -->
             <article class="main-content {% if pagename != 'index' %}premium-card{% endif %}">
                 {{ super() }}
+                
+                <!-- Share Buttons for Blog Posts -->
+                {% if pagename and pagename.startswith('blog/') %}
+                <div class="share-buttons">
+                    <span class="share-label">シェア:</span>
+                    <a href="https://twitter.com/intent/tweet?text={{ title|urlencode }}&url={{ page_url|urlencode }}&via=sion908" target="_blank" rel="noopener" class="share-button share-twitter" aria-label="Share on Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ page_url|urlencode }}" target="_blank" rel="noopener" class="share-button share-facebook" aria-label="Share on Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://b.hatena.ne.jp/entry/{{ page_url }}" target="_blank" rel="noopener" class="share-button share-hatena" aria-label="Share on Hatena Bookmark">
+                        <span>B!</span>
+                    </a>
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ page_url|urlencode }}" target="_blank" rel="noopener" class="share-button share-linkedin" aria-label="Share on LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+                {% endif %}
             </article>
 
             <!-- Right: Table of Contents (Desktop Only) -->

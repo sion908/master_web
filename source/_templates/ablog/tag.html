@@ -1,0 +1,16 @@
+{%- extends "page.html" -%}
+
+{% block content %}
+<div class="main-wrapper">
+    <div class="container content-container no-sidebar">
+        <article class="main-content premium-card">
+            <h1>タグクラウド</h1>
+            <p>興味のあるトピックから記事を探す</p>
+            
+            <div class="tag-cloud-wrapper">
+                {{ tag_cloud }}
+            </div>
+        </article>
+    </div>
+</div>
+{% endblock %}

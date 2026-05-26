@@ -62,6 +62,10 @@ Python、Web開発、クラウド技術
            <i class="fas fa-arrow-right"></i>
            すべての記事を見る
        </a>
+       <a href="blog/tag.html" class="btn btn-outline">
+           <i class="fas fa-tags"></i>
+           タグで探す
+       </a>
    </div>
 
 .. toctree::

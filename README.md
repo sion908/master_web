@@ -90,6 +90,36 @@ sion908/
 
 3. `make html` でビルドを実行し、`build/html/` 配下のファイルが更新されたことを確認します。
 
+### カスタムディレクティブ
+
+記事内で以下のカスタムディレクティブを使用できます。
+
+#### Twitter埋め込み
+
+```rst
+.. twitter:: ツイートID
+```
+
+Twitter埋め込みのテーマはブログのライト/ダークモードに自動的に同期されます。
+
+#### OGPカード
+
+```rst
+.. ogp-card:: https://example.com
+   :title: ページタイトル
+   :description: ページの説明文
+   :image: https://example.com/image.png
+   :site_name: サイト名
+```
+
+OGP情報を自動更新するには：
+
+```bash
+make update-ogp
+```
+
+このコマンドは `source/blog/` ディレクトリ内のすべてのRSTファイルをスキャンし、`.. ogp-card::` ディレクティブのURLからOGP情報を取得して自動更新します。
+
 ## 🎨 カスタマイズ
 
 - **デザインの変更**: 全てのスタイルは `source/_static/custom.css` で管理されています。CSS変数（`:root`）を変更することで、ベースカラーやグラスモーフィズムの強度を調整できます。

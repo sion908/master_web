@@ -19,6 +19,8 @@ extensions = [
     'sphinxemoji.sphinxemoji',
     'sphinxext.opengraph',
     'sphinx_nekochan',
+    'twitter_directive',
+    'ogp_card_directive',
 ]
 
 templates_path = ['_templates']
@@ -42,6 +44,7 @@ blog_default_author = 'sion908'
 blog_authors = {
     'sion908': ('https://sion908.tech', 'sionn908@gmail.com'),
 }
+blog_tagcloud = True
 
 # Font Awesome for icons
 html_css_files = [
@@ -58,8 +61,12 @@ ogp_description_length = 200  # 本文からの抽出文字数（:og:description
 
 # matplotlibに日本語フォントを登録
 import os
+import sys
 from pathlib import Path
 import matplotlib.font_manager as fm
+
+# カスタム拡張機能のパスを追加
+sys.path.insert(0, str(Path(__file__).parent / '_ext'))
 
 # フォントファイルの絶対パスを取得
 font_path = Path(__file__).parent / "_static" / "fonts" / "HackGen35-Regular.ttf"

@@ -34,3 +34,7 @@ serve:
 
 dev: html serve
 	@echo "Development server started"
+
+update-ogp:
+	@uv run python scripts/update_ogp_cards.py source/blog
+	@echo "OGP cards updated"

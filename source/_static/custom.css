@@ -791,6 +791,131 @@ ul.ablog-post-info a.reference.internal:hover {
     box-shadow: var(--shadow-sm);
 }
 
+/* Ablog Post Navigation (Previous/Next) */
+.ablog__prev-next, .ablog-postnav, .postnav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+.ablog__prev-next .ablog__prev, .ablog__prev-next .ablog__next,
+.ablog-postnav .prev, .ablog-postnav .next,
+.postnav .prev, .postnav .next {
+    flex: 1;
+}
+.ablog__prev-next .ablog__prev a, .ablog__prev-next .ablog__next a,
+.ablog-postnav .prev a, .ablog-postnav .next a,
+.postnav .prev a, .postnav .next a {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+    transition: color var(--transition-speed) ease;
+}
+.ablog__prev-next .ablog__prev a:hover, .ablog__prev-next .ablog__next a:hover,
+.ablog-postnav .prev a:hover, .ablog-postnav .next a:hover,
+.postnav .prev a:hover, .postnav .next a:hover {
+    color: var(--primary-color) !important;
+    text-decoration: none;
+}
+.ablog__prev-next .ablog__next, .ablog-postnav .next, .postnav .next {
+    text-align: right;
+}
+
+/* Postlist excerpt styling */
+ul.ablog-post-list li p.ablog-post-excerpt {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+/* Share Buttons */
+.share-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+.share-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.share-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: transform var(--transition-speed) ease, opacity var(--transition-speed) ease;
+}
+.share-button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+.share-twitter {
+    background: #1da1f2;
+}
+.share-facebook {
+    background: #1877f2;
+}
+.share-hatena {
+    background: #00a4de;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+.share-linkedin {
+    background: #0a66c2;
+}
+
+/* Tag Cloud */
+.tag-cloud-wrapper {
+    margin-top: 2rem;
+}
+ul.ablog-cloud {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+ul.ablog-cloud li {
+    margin: 0;
+}
+ul.ablog-cloud li a {
+    background: var(--primary-light);
+    color: var(--primary-color) !important;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all var(--transition-speed) ease;
+    text-decoration: none;
+    display: inline-block;
+}
+ul.ablog-cloud li a:hover {
+    background: var(--primary-color);
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+ul.ablog-cloud li a.tag-1 { font-size: 0.8rem; }
+ul.ablog-cloud li a.tag-2 { font-size: 0.85rem; }
+ul.ablog-cloud li a.tag-3 { font-size: 0.9rem; }
+ul.ablog-cloud li a.tag-4 { font-size: 0.95rem; }
+ul.ablog-cloud li a.tag-5 { font-size: 1rem; }
+ul.ablog-cloud li a.tag-6 { font-size: 1.05rem; }
+ul.ablog-cloud li a.tag-7 { font-size: 1.1rem; }
+ul.ablog-cloud li a.tag-8 { font-size: 1.15rem; }
+ul.ablog-cloud li a.tag-9 { font-size: 1.2rem; }
+ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
+
 /* =========================================
    9. Dark Mode Premium Refinements & Pygments
    ========================================= */
@@ -852,4 +977,102 @@ ul.ablog-post-info a.reference.internal:hover {
 }
 [data-theme='dark'] .highlight .m, [data-theme='dark'] .highlight .mf, [data-theme='dark'] .highlight .mh, [data-theme='dark'] .highlight .mi, [data-theme='dark'] .highlight .mo {
     color: #d19a66 !important; /* Orange/Numbers */
+}
+
+/* =========================================
+   10. Twitter Embed Theme Sync
+   ========================================= */
+/* Twitter埋め込みのテーマをブログのテーマに合わせる */
+[data-theme='dark'] .twitter-tweet {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+[data-theme='dark'] .twitter-tweet a {
+    color: #60a5fa !important;
+}
+[data-theme='light'] .twitter-tweet {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+[data-theme='light'] .twitter-tweet a {
+    color: #3b82f6 !important;
+}
+
+/* =========================================
+   11. OGP Card Styles
+   ========================================= */
+.ogp-card {
+    display: block;
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: box-shadow var(--transition-speed) ease, transform var(--transition-speed) ease;
+    margin: 1.5rem 0;
+    max-width: 100%;
+}
+.ogp-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+.ogp-card-content {
+    display: flex;
+    flex-direction: column;
+}
+@media (min-width: 640px) {
+    .ogp-card-content {
+        flex-direction: row;
+    }
+}
+.ogp-card-image {
+    width: 100%;
+    height: 140px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+@media (min-width: 640px) {
+    .ogp-card-image {
+        width: 180px;
+        height: auto;
+    }
+}
+.ogp-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.ogp-card-info {
+    padding: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+.ogp-card-site {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.ogp-card-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.ogp-card-description {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
