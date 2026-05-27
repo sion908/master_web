@@ -169,18 +169,19 @@
                 
                 <!-- Share Buttons for Blog Posts -->
                 {% if pagename and pagename.startswith('blog/') %}
+                {% set share_url = page_url if page_url else ('https://sion908.tech/' + pagename + '.html') %}
                 <div class="share-buttons">
                     <span class="share-label">シェア:</span>
-                    <a href="https://twitter.com/intent/tweet?text={{ title|urlencode }}&url={{ page_url|urlencode }}&via=sion908" target="_blank" rel="noopener" class="share-button share-twitter" aria-label="Share on Twitter">
+                    <a href="https://twitter.com/intent/tweet?text={{ title|urlencode }}&url={{ share_url|urlencode }}&via=Sion908_" target="_blank" rel="noopener" class="share-button share-twitter" aria-label="Share on Twitter">
                         <i class="fab fa-twitter"></i>
                     </a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ page_url|urlencode }}" target="_blank" rel="noopener" class="share-button share-facebook" aria-label="Share on Facebook">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" rel="noopener" class="share-button share-facebook" aria-label="Share on Facebook">
                         <i class="fab fa-facebook-f"></i>
                     </a>
-                    <a href="https://b.hatena.ne.jp/entry/{{ page_url }}" target="_blank" rel="noopener" class="share-button share-hatena" aria-label="Share on Hatena Bookmark">
+                    <a href="https://b.hatena.ne.jp/entry/{{ share_url }}" target="_blank" rel="noopener" class="share-button share-hatena" aria-label="Share on Hatena Bookmark">
                         <span>B!</span>
                     </a>
-                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ page_url|urlencode }}" target="_blank" rel="noopener" class="share-button share-linkedin" aria-label="Share on LinkedIn">
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url|urlencode }}" target="_blank" rel="noopener" class="share-button share-linkedin" aria-label="Share on LinkedIn">
                         <i class="fab fa-linkedin-in"></i>
                     </a>
                 </div>
