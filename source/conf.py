@@ -21,7 +21,6 @@ extensions = [
     'sphinx_nekochan',
     'twitter_directive',
     'ogp_card_directive',
-    'sphinxcontrib.mermaid',
 ]
 
 templates_path = ['_templates']
