@@ -64,6 +64,7 @@ import os
 import sys
 from pathlib import Path
 import matplotlib.font_manager as fm
+import matplotlib.pyplot as plt
 
 # カスタム拡張機能のパスを追加
 sys.path.insert(0, str(Path(__file__).parent / '_ext'))
@@ -80,8 +81,11 @@ else:
     # フォントが見つからない場合はフォールバック
     font_family = "DejaVu Sans"
 
+# matplotlibのフォントサイズをグローバルに設定（OGP画像のタイトルが入りきらない対策）
+plt.rcParams['font.size'] = 12  # デフォルトより小さく
+
 ogp_social_cards = {
-    "enable": True,
+    "enable": True,  # sphinxext-opengraphを使用
     "image_mini": "./_static/sion_rounded.png", # 右下のデフォルトロゴ(目)を独自の画像(角丸)に置き換え
     "font": font_family, # matplotlibに登録したフォントファミリ名を使用
     "line_color": "#968ABD", # アクセントラインの色
