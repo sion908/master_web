@@ -1076,3 +1076,134 @@ ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* =========================================
+   12. Nagasaki Tech Calendar Page Styles
+   ========================================= */
+.calendar-hero {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+.calendar-hero .badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.calendar-hero h1 {
+    color: white !important;
+    font-size: 2rem !important;
+    margin: 0 0 1rem 0 !important;
+    line-height: 1.2;
+}
+.calendar-hero .lead {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    max-width: 720px;
+    margin: 0 auto 1.5rem auto;
+}
+.calendar-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.calendar-actions .btn-primary {
+    background: white;
+    color: var(--primary-color) !important;
+    border: none;
+}
+.calendar-actions .btn-primary:hover {
+    background: var(--bg-body);
+    color: var(--primary-color) !important;
+}
+
+.calendar-wrap {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: #fff;
+    margin-bottom: 2rem;
+}
+.calendar-wrap iframe {
+    width: 100%;
+    height: 680px;
+    border: 0;
+    display: block;
+}
+.note {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.calendar-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    transition: box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+}
+.calendar-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+.calendar-card h3 {
+    font-size: 1.1rem !important;
+    margin: 0 0 0.75rem 0 !important;
+    color: var(--text-primary) !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.calendar-card h3 i {
+    color: var(--primary-color);
+}
+.calendar-card p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.calendar-submit {
+    background: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+}
+.calendar-submit p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .calendar-hero {
+        padding: 2rem 1rem;
+    }
+    .calendar-hero h1 {
+        font-size: 1.5rem !important;
+    }
+    .calendar-grid {
+        grid-template-columns: 1fr;
+    }
+    .calendar-wrap iframe {
+        height: 560px;
+    }
+}

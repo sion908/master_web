@@ -36,6 +36,12 @@ Python、Web開発、クラウド技術
                        <p>登壇資料や技術解説スライドのアーカイブ</p>
                        <a href="https://slide.sion908.tech/">Browse Slides</a>
                    </div>
+                   <div class="service-item">
+                       <i class="fas fa-calendar-alt"></i>
+                       <h4>長崎ITイベントカレンダー</h4>
+                       <p>長崎県内の技術イベントを集約した公開カレンダー</p>
+                       <a href="nagasaki-tech-calendar.html">View Calendar</a>
+                   </div>
                </div>
            </div>
        </section>
@@ -74,6 +80,7 @@ Python、Web開発、クラウド技術
    :hidden:
 
    blog
+   nagasaki-tech-calendar
    contact
    privacy
 
