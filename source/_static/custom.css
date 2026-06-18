@@ -947,6 +947,29 @@ ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
     background: var(--primary-color);
 }
 
+/* Light Mode Pygments (Syntax Highlighting) Overrides */
+.highlight .k, .highlight .kc, .highlight .kd, .highlight .kn, .highlight .kp, .highlight .kr {
+    color: #8b5cf6 !important; /* Violet 500 - lighter purple for light mode */
+}
+.highlight .s, .highlight .s2, .highlight .sa, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s1 {
+    color: #059669 !important; /* Emerald 600 - darker green for better contrast */
+}
+.highlight .nc, .highlight .nf, .highlight .nx {
+    color: #2563eb !important; /* Blue 600 */
+}
+.highlight .c, .highlight .c1, .highlight .cm, .highlight .ch {
+    color: #9ca3af !important; /* Gray 400 */
+}
+.highlight .o, .highlight .ow {
+    color: #0891b2 !important; /* Cyan 600 */
+}
+.highlight .nd {
+    color: #d97706 !important; /* Amber 600 */
+}
+.highlight .m, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .mo {
+    color: #dc2626 !important; /* Red 600 - numbers */
+}
+
 /* Dark Mode Pygments (Syntax Highlighting) Overrides */
 [data-theme='dark'] div.highlight {
     background: #0f172a !important; /* Slate 900 */
@@ -961,7 +984,7 @@ ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
     color: #c678dd !important; /* Purple */
 }
 [data-theme='dark'] .highlight .s, [data-theme='dark'] .highlight .s2, [data-theme='dark'] .highlight .sa, [data-theme='dark'] .highlight .sb, [data-theme='dark'] .highlight .sc, [data-theme='dark'] .highlight .dl, [data-theme='dark'] .highlight .sd, [data-theme='dark'] .highlight .s1 {
-    color: #98c379 !important; /* Green */
+    color: #a5d6ff !important; /* Light blue - better contrast on dark background */
 }
 [data-theme='dark'] .highlight .nc, [data-theme='dark'] .highlight .nf, [data-theme='dark'] .highlight .nx {
     color: #61afef !important; /* Blue */
