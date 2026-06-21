@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # デフォルト設定
-DEFAULT_PORT=8080
+DEFAULT_PORT=8090
 PORT=$DEFAULT_PORT
 BUILD_ONLY=false
 SKIP_BUILD=false
