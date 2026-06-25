@@ -159,9 +159,13 @@ div.document, div.bodywrapper, div.body {
 @media (max-width: 1024px) {
     .content-container {
         grid-template-columns: 1fr;
+        gap: 0;
     }
     .sidebar-toc {
         display: none; /* Hide TOC on mobile/tablet */
+    }
+    .content-container > aside {
+        display: none;
     }
     .premium-card {
         padding: 2rem 1.5rem;
