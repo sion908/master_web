@@ -122,9 +122,9 @@ setup_environment() {
     fi
     
     # 必要なパッケージの確認
-    if ! python -c "import sphinx, ablog" 2>/dev/null; then
+    if ! python -c "import sphinx, ablog, sphinx_sitemap" 2>/dev/null; then
         log_info "必要なパッケージをインストールします..."
-        pip install sphinx ablog sphinx-design sphinxemoji sphinxext-opengraph sphinx-nekochan pymdown-extensions
+        pip install sphinx ablog sphinx-design sphinxemoji sphinxext-opengraph sphinx-nekochan sphinx-sitemap pymdown-extensions
     fi
     
     log_success "環境のセットアップ完了"
