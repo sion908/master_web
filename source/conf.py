@@ -21,6 +21,7 @@ extensions = [
     'sphinx_nekochan',
     'twitter_directive',
     'ogp_card_directive',
+    'sphinx_sitemap',
 ]
 
 templates_path = ['_templates']
@@ -34,6 +35,8 @@ language = 'ja'
 html_theme = 'default'
 html_static_path = ['_static']
 html_extra_path = ['_extra']
+html_baseurl = 'https://sion908.tech/'
+sitemap_url_scheme = "{link}"
 
 # Ablog configuration
 blog_title = 'Sion908 Blog'
