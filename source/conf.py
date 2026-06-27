@@ -37,6 +37,21 @@ html_static_path = ['_static']
 html_extra_path = ['_extra']
 html_baseurl = 'https://sion908.tech/'
 sitemap_url_scheme = "{link}"
+sitemap_excludes = [
+    "search.html",
+    "genindex.html",
+    "blog/drafts.html",
+    "blog/archive.html",
+    "blog/[0-9][0-9][0-9][0-9].html",
+    "blog/tag.html",
+    "blog/tag/*",
+    "blog/author.html",
+    "blog/author/*",
+    "blog/location.html",
+    "blog/location/*",
+    "blog/language.html",
+    "blog/language/*",
+]
 
 # Ablog configuration
 blog_title = 'Sion908 Blog'
@@ -103,6 +118,31 @@ nekochan_footer = {
     "target": "_blank",
 }
 
+
+def deduplicate_sitemap(app, exception):
+    if exception:
+        return
+
+    from xml.etree import ElementTree
+
+    sitemap_path = Path(app.outdir) / app.config.sitemap_filename
+    if not sitemap_path.exists():
+        return
+
+    namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+    tree = ElementTree.parse(sitemap_path)
+    root = tree.getroot()
+    seen = set()
+
+    for url in list(root):
+        loc = url.find("sm:loc", namespace)
+        if loc is None or loc.text in seen:
+            root.remove(url)
+            continue
+        seen.add(loc.text)
+
+    tree.write(sitemap_path, xml_declaration=True, encoding="utf-8", method="xml")
+
 # Post configuration (ablog)
 fontawesome = {
     'github': 'fab fa-github',
@@ -132,3 +172,7 @@ def custom_get_description(doctree, length, known_titles):
 # モジュールの参照とその利用元の両方を置き換える
 ogp_desc.get_description = custom_get_description
 ogp_init.get_description = custom_get_description
+
+
+def setup(app):
+    app.connect("build-finished", deduplicate_sitemap, priority=900)
