@@ -108,11 +108,20 @@ code, pre {
 .sphinxsidebar, .sidebar, .related {
     display: none !important;
 }
-div.document, div.bodywrapper, div.body {
+div.document, div.documentwrapper, div.bodywrapper, div.body {
+    display: block !important;
     background: none !important;
     margin: 0 !important;
     padding: 0 !important;
     max-width: none !important;
+    float: none !important;
+    width: auto !important;
+}
+
+/* 見出しのネガティブマージン（左右 -20px）の完全無効化 */
+div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 /* =========================================
@@ -190,6 +199,34 @@ div.document, div.bodywrapper, div.body {
     }
     .main-content h3 {
         font-size: 1.1rem !important;
+    }
+
+    /* テーブルの横スクロール対応 */
+    table.docutils {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* コードブロックの余白と文字サイズ調整 */
+    div.highlight pre {
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    /* 前後記事ナビゲーションの縦並び化 */
+    .ablog__prev-next, .ablog-postnav, .postnav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .ablog__prev-next .ablog__next, .ablog-postnav .next, .postnav .next {
+        text-align: left;
+    }
+
+    /* 警告・注意枠の余白調整 */
+    div.admonition, div.warning, div.note {
+        padding: 1rem 1rem !important;
     }
 }
 
@@ -525,6 +562,9 @@ div.document, div.bodywrapper, div.body {
     box-shadow: var(--shadow-sm);
     margin: 1.5rem 0;
 }
+.main-content iframe {
+    max-width: 100%;
+}
 
 /* Admonitions (Note, Warning, etc) */
 div.admonition, div.warning, div.note {
@@ -591,6 +631,8 @@ code.literal, .literal {
     padding: 0.2rem 0.4rem;
     border-radius: 0.25rem;
     font-size: 0.9em;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 /* Blockquotes */
