@@ -10,6 +10,8 @@ div.related,
 .related { display: none !important; }
 /* Sphinxデフォルトのサイドバー（カスタムTOCは別クラス） */
 div.sphinxsidebar { display: none !important; }
+/* トップページのデフォルト大見出しを非表示 */
+#pythonweb > h1 { display: none; }
 /* ドキュメント感のある要素を非表示 */
 .headerlink { visibility: hidden; }
 h1:hover .headerlink,
@@ -745,16 +747,69 @@ table.docutils td {
 /* =========================================
    8. Ablog Specifics & Components
    ========================================= */
-/* Hero Section in index.rst */
-.main-sections {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
+/* Portal Layout Container */
+.portal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
 }
-@media (min-width: 768px) {
-    .main-sections {
-        grid-template-columns: 1fr 1fr;
+
+/* Portal Grid (Mobile First Layout) */
+.portal-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.portal-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* スマホ版（〜 767px）: 縦1カラム。Welcomeを一番上に。 */
+@media (max-width: 767px) {
+    .portal-main { order: 1; }
+    .portal-sidebar-left { order: 2; }
+    .portal-sidebar-right { order: 3; }
+}
+
+/* タブレット版（768px 〜 1023px）: 2カラム。左にメイン、右にサイドバーを縦積み */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .portal-grid {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 2rem;
+        align-items: start;
+    }
+    .portal-main {
+        grid-column: 1;
+        grid-row: 1 / span 2; /* 縦に2セル分広がる */
+    }
+    .portal-sidebar-left {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .portal-sidebar-right {
+        grid-column: 2;
+        grid-row: 2;
+    }
+}
+
+/* PC版（1024px 〜）: 3カラム。1200pxコンテナに最適なバランス（250px | 1fr | 250px） */
+@media (min-width: 1024px) {
+    .portal-grid {
+        display: grid;
+        grid-template-columns: 250px 1fr 250px;
+        gap: 2rem;
+        align-items: start;
+    }
+    
+    /* PC版で左右サイドバーのカードの横幅を確保するためのパディング調整 */
+    .portal-sidebar-left .premium-card,
+    .portal-sidebar-right .premium-card {
+        padding: 2rem 1.5rem !important;
     }
 }
 
@@ -819,7 +874,9 @@ table.docutils td {
 .cta-section {
     display: flex;
     justify-content: center;
-    margin: 2rem 0;
+    gap: 1.5rem;
+    margin: 2rem 0 0 0;
+    flex-wrap: wrap;
 }
 
 .btn-outline, .btn-primary {
@@ -1575,6 +1632,193 @@ ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
 .profile-skills li i {
     margin-right: 0.3rem;
     color: var(--primary-color);
+}
+
+/* =========================================
+   12. Hero Welcome & Custom Latest Posts List
+   ========================================= */
+
+/* Hero Section */
+.hero-section {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+[data-theme='dark'] .hero-section {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%) !important;
+}
+
+.hero-header {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.hero-badge {
+    align-self: flex-start;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    background: var(--primary-light);
+    padding: 0.3rem 0.75rem;
+    border-radius: 9999px;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.2;
+    background: linear-gradient(to right, #3b82f6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-tagline {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.hero-description {
+    font-size: 0.975rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.hero-description strong {
+    color: var(--text-primary);
+}
+
+/* Latest Posts Layout Overrides */
+.latest-posts .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.latest-posts h3 {
+    margin-bottom: 0.25rem;
+}
+
+.latest-posts .section-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.latest-posts ul.postlist {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0.5rem 0 0 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.latest-posts li.ablog-post {
+    position: relative; /* ストレッチリンクの基準点 */
+    border-bottom: 1px dashed var(--border-color);
+    padding: 1.25rem 1rem;
+    margin: 0 -1rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+
+.latest-posts li.ablog-post:last-child {
+    border-bottom: none;
+    padding-bottom: 1.25rem;
+}
+
+.latest-posts li.ablog-post:hover {
+    background: var(--primary-light);
+    transform: translateX(6px);
+}
+
+.latest-posts li.ablog-post p.ablog-post-title {
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0 !important;
+    line-height: 1.4 !important;
+    flex-wrap: wrap;
+}
+
+.latest-posts li.ablog-post p.ablog-post-title a {
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color var(--transition-speed) ease;
+    /* position: relative; を削除し、::beforeがli.ablog-postを参照するようにする */
+}
+
+/* カード全体をクリック可能にするストレッチリンク */
+.latest-posts li.ablog-post p.ablog-post-title a::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+.latest-posts li.ablog-post p.ablog-post-title a::after {
+    content: "\f061";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin-left: 0.5rem;
+    opacity: 0;
+    transition: transform var(--transition-speed) ease, opacity var(--transition-speed) ease;
+}
+
+.latest-posts li.ablog-post:hover p.ablog-post-title a {
+    color: var(--primary-color);
+}
+
+.latest-posts li.ablog-post:hover p.ablog-post-title a::after {
+    opacity: 1;
+    transform: translateX(6px);
+    color: var(--primary-color);
+}
+
+.latest-posts li.ablog-post p.ablog-post-excerpt {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0 !important;
+    line-height: 1.6 !important;
+    padding-left: 0;
+}
+
+@media (max-width: 768px) {
+    .latest-posts li.ablog-post p.ablog-post-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+    }
 }
 
 
