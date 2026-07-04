@@ -2,13 +2,23 @@
 
 {% block extrahead %}
     {{ super() }}
+
+    <!-- Meta description for auto-generated pages -->
+    {% if pagename == 'blog/archive' %}
+    <meta name="description" content="Sion908 Blogの全記事アーカイブ。Python、AWS、Docker、Web開発などの技術記事を時系列で一覧できます。">
+    {% elif pagename == 'blog/tag' %}
+    <meta name="description" content="Sion908 Blogのタグ一覧。技術スタック・ドメイン・目的別に記事を探せます。">
+    {% elif pagename == 'blog' %}
+    <meta name="description" content="Sion908の技術ブログ。Python、AWS、Docker、Web開発、クラウド技術の実践記事を公開しています。">
+    {% endif %}
+
     <!-- Canonical URL -->
     {% if page_url %}
     <link rel="canonical" href="{{ page_url }}">
     {% endif %}
 
     <!-- Structured Data (JSON-LD) for Blog Posts -->
-    {% if pagename and pagename.startswith('blog/') %}
+    {% if pagename and pagename.startswith('blog/') and not pagename.endswith('archive') and not pagename.endswith('tag') %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -20,6 +30,65 @@
         "@type": "Person",
         "name": "{{ author if author else 'sion908' }}"
       }
+    }
+    </script>
+    {% endif %}
+
+    <!-- Structured Data: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "ホーム",
+          "item": "https://sion908.tech/"
+        }{% if pagename and pagename.startswith('blog/') %},
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "ブログ",
+          "item": "https://sion908.tech/blog.html"
+        }{% if pagename != 'blog' and pagename != 'blog/archive' and pagename != 'blog/tag' %},
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "{{ title if title else '' }}",
+          "item": "{{ page_url if page_url else '' }}"
+        }{% endif %}{% elif pagename == 'tags' %},
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "タグクラウド",
+          "item": "https://sion908.tech/tags.html"
+        }{% elif pagename and pagename != 'index' %},
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "{{ title if title else '' }}",
+          "item": "{{ page_url if page_url else '' }}"
+        }{% endif %}
+      ]
+    }
+    </script>
+
+    <!-- Structured Data: WebSite (top page only) -->
+    {% if pagename == 'index' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Sion908 Blog",
+      "url": "https://sion908.tech/",
+      "description": "Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。",
+      "author": {
+        "@type": "Person",
+        "name": "sion908",
+        "url": "https://portfolio.sion908.tech/"
+      },
+      "inLanguage": "ja"
     }
     </script>
     {% endif %}
@@ -46,9 +115,14 @@
     <meta name="twitter:image" content="{{ meta.get('og-image') }}">
     {% endif %}
 
-    <!-- Google Fonts: Outfit and Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Outfit, Inter, JetBrains Mono -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Preconnect to Google Fonts for faster font file downloads -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Font Awesome -->
+    <!-- TODO: Issue #10 - 使用アイコン10種程度のため、中期的にSVGスプライト or Font Awesome Kit（サブセット配信）への移行を検討 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Initial Theme Check (Prevent FOUC) -->
@@ -77,6 +151,7 @@
 {% endblock %}
 
 {% block header %}
+   <a href="#main-content" class="skip-link">本文へスキップ</a>
    <header class="site-header sticky-header">
        <div class="container header-container">
            <a class="site-logo" href="{{ pathto(master_doc) }}">
@@ -125,24 +200,74 @@
            const hamburgerToggle = document.getElementById('hamburger-toggle');
            const navLinks = document.getElementById('nav-links');
            if (hamburgerToggle && navLinks) {
+               const navLinkItems = navLinks.querySelectorAll('.nav-link');
+
+               function openMenu() {
+                   hamburgerToggle.classList.add('active');
+                   navLinks.classList.add('active');
+                   hamburgerToggle.setAttribute('aria-expanded', 'true');
+                   // フォーカスを最初のリンクに移動
+                   if (navLinkItems.length > 0) {
+                       navLinkItems[0].focus();
+                   }
+               }
+
+               function closeMenu() {
+                   hamburgerToggle.classList.remove('active');
+                   navLinks.classList.remove('active');
+                   hamburgerToggle.setAttribute('aria-expanded', 'false');
+                   hamburgerToggle.focus();
+               }
+
+               hamburgerToggle.setAttribute('aria-expanded', 'false');
                hamburgerToggle.addEventListener('click', () => {
-                   hamburgerToggle.classList.toggle('active');
-                   navLinks.classList.toggle('active');
+                   const isOpen = hamburgerToggle.classList.contains('active');
+                   if (isOpen) {
+                       closeMenu();
+                   } else {
+                       openMenu();
+                   }
+               });
+
+               // Escキーでメニューを閉じる
+               document.addEventListener('keydown', (e) => {
+                   if (e.key === 'Escape' && hamburgerToggle.classList.contains('active')) {
+                       closeMenu();
+                   }
+               });
+
+               // フォーカストラップ: メニュー内でTabキーが循環する
+               navLinks.addEventListener('keydown', (e) => {
+                   if (e.key !== 'Tab' || !hamburgerToggle.classList.contains('active')) return;
+                   const firstLink = navLinkItems[0];
+                   const lastLink = navLinkItems[navLinkItems.length - 1];
+
+                   if (e.shiftKey) {
+                       if (document.activeElement === firstLink) {
+                           e.preventDefault();
+                           lastLink.focus();
+                       }
+                   } else {
+                       if (document.activeElement === lastLink) {
+                           e.preventDefault();
+                           firstLink.focus();
+                       }
+                   }
                });
 
                // Close menu when clicking on a nav link
-               navLinks.querySelectorAll('.nav-link').forEach(link => {
+               navLinkItems.forEach(link => {
                    link.addEventListener('click', () => {
-                       hamburgerToggle.classList.remove('active');
-                       navLinks.classList.remove('active');
+                       closeMenu();
                    });
                });
 
                // Close menu when clicking outside
                document.addEventListener('click', (e) => {
                    if (!hamburgerToggle.contains(e.target) && !navLinks.contains(e.target)) {
-                       hamburgerToggle.classList.remove('active');
-                       navLinks.classList.remove('active');
+                       if (hamburgerToggle.classList.contains('active')) {
+                           closeMenu();
+                       }
                    }
                });
            }
@@ -165,7 +290,7 @@
     <main class="main-wrapper">
         <div class="container content-container {% if pagename == 'index' %}no-sidebar{% endif %}">
             <!-- Left: Main Article Content -->
-            <article class="main-content {% if pagename != 'index' %}premium-card{% endif %}">
+            <article id="main-content" class="main-content {% if pagename != 'index' %}premium-card{% endif %}">
                 {{ super() }}
                 
                 <!-- Share Buttons for Blog Posts -->

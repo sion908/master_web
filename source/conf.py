@@ -22,6 +22,7 @@ extensions = [
     'twitter_directive',
     'ogp_card_directive',
     'sphinx_sitemap',
+    'lazy_images',
 ]
 
 templates_path = ['_templates']
@@ -35,6 +36,11 @@ language = 'ja'
 html_theme = 'default'
 html_static_path = ['_static']
 html_extra_path = ['_extra']
+
+# SphinxデフォルトUI要素の除去（AdSense対策: ブログらしさを出す）
+html_show_sourcelink = False  # 「ソースコードを表示」リンクを非表示
+html_copy_source = False      # ソースファイルのコピーを無効化
+html_use_index = False        # 索引ページを無効化
 html_baseurl = 'https://sion908.tech/'
 sitemap_url_scheme = "{link}"
 sitemap_excludes = [

@@ -1,5 +1,20 @@
 /* Sion908 Blog - Premium KINTO Style Design System */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+/* NOTE: Google Fonts は layout.html の <link> で読み込み済み。
+   @import による重複読み込みを廃止（レンダーブロッキング防止）*/
+
+/* =========================================
+   0. Sphinx Default UI Elements - Hide
+   ========================================= */
+/* 次へ/前へナビ（relbar） */
+div.related,
+.related { display: none !important; }
+/* Sphinxデフォルトのサイドバー（カスタムTOCは別クラス） */
+div.sphinxsidebar { display: none !important; }
+/* ドキュメント感のある要素を非表示 */
+.headerlink { visibility: hidden; }
+h1:hover .headerlink,
+h2:hover .headerlink,
+h3:hover .headerlink { visibility: visible; }
 
 /* =========================================
    1. CSS Variables (Light & Dark Themes)
@@ -36,7 +51,7 @@
 [data-theme='dark'] {
     --text-primary: #f8fafc;       /* Slate 50 */
     --text-secondary: #cbd5e1;     /* Slate 300 */
-    --text-muted: #94a3b8;         /* Slate 400 */
+    --text-muted: #a1b5cc;         /* Slate 400 adjusted for 4.5:1 contrast on bg-card */
     
     --bg-body: #0f172a;            /* Slate 900 */
     --bg-header: rgba(15, 23, 42, 0.85);
@@ -56,6 +71,45 @@
 }
 
 /* =========================================
+   1b. Focus & Accessibility
+   ========================================= */
+/* フォーカスリング: キーボードユーザー向け */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* マウスクリック時はフォーカスリングを抑制 */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Skip to main content リンク */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 9999;
+    background: var(--primary-color);
+    color: #ffffff !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+.skip-link:focus {
+    top: 1rem;
+}
+
+/* =========================================
    2. Base Styles & Resets
    ========================================= */
 html {
@@ -67,6 +121,7 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    min-height: 100dvh; /* モバイルブラウザのアドレスバー対応 */
     background-color: var(--bg-body) !important;
     color: var(--text-primary) !important;
     font-family: var(--font-body) !important;
@@ -300,8 +355,8 @@ div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6 {
     background: var(--bg-body);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -337,8 +392,8 @@ div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6 {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
         background: var(--bg-body);
         border: 1px solid var(--border-color);
         border-radius: 8px;
@@ -545,15 +600,18 @@ div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6 {
     color: var(--text-primary);
     text-align: left; /* 追加: justifyによる文字間隔の不自然な広がりを防止 */
     overflow-wrap: break-word;
+    max-width: 75ch;
 }
 .main-content ul, .main-content ol {
     margin-bottom: 1.5rem;
     padding-left: 1.5rem;
+    max-width: 75ch;
 }
 .main-content li {
     margin-bottom: 0.5rem;
     text-align: left; /* 追加: justifyによる文字間隔の不自然な広がりを防止 */
     overflow-wrap: break-word;
+    max-width: 75ch;
 }
 .main-content img {
     max-width: 100%;
@@ -561,6 +619,23 @@ div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6 {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     margin: 1.5rem 0;
+}
+
+/* 外部リンクインジケーター（記事本文内） */
+.main-content a[href^="http"]:not([href*="sion908.tech"])::after {
+    content: "\2197"; /* ↗ */
+    display: inline-block;
+    margin-left: 0.2em;
+    font-size: 0.75em;
+    opacity: 0.6;
+    text-decoration: none;
+}
+/* シェアボタン・OGPカード等は除外 */
+.main-content .share-button::after,
+.main-content .ogp-card::after,
+.main-content .btn-outline::after,
+.main-content .btn-primary::after {
+    content: none;
 }
 .main-content iframe {
     max-width: 100%;
@@ -893,8 +968,8 @@ ul.ablog-post-list li p.ablog-post-excerpt {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     color: #ffffff;
     font-size: 1rem;
@@ -1274,5 +1349,243 @@ ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
     }
     .calendar-wrap iframe {
         height: 560px;
+    }
+}
+
+
+/* =========================================
+   Postcard - Article List Item Styles
+   ========================================= */
+.postcard-item {
+    list-style: none;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.postcard-item:last-child {
+    border-bottom: none;
+}
+
+.postcard-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.postcard-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color var(--transition-speed);
+}
+
+.postcard-title:hover {
+    color: var(--primary-color);
+}
+
+.postcard-title:visited {
+    color: var(--visited-color);
+}
+
+.postcard-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.postcard-date i {
+    margin-right: 0.25rem;
+}
+
+.postcard-excerpt {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0.3rem 0 0.5rem;
+}
+
+.postcard-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.postcard-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: background var(--transition-speed);
+}
+
+.postcard-tag:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+
+/* =========================================
+   Tag Cloud Page Styles
+   ========================================= */
+.tagcloud-page {
+    margin: 1.5rem 0;
+}
+
+.ablog-cloud {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1rem;
+}
+
+.ablog-cloud li {
+    display: inline-block;
+}
+
+.ablog-cloud li a {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-md);
+    background: var(--primary-light);
+    color: var(--primary-color);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    transition: all var(--transition-speed);
+    border: 1px solid transparent;
+}
+
+.ablog-cloud li a:hover {
+    background: var(--primary-color);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.ablog-cloud li a:visited {
+    color: var(--visited-color);
+    background: rgba(124, 58, 237, 0.08);
+}
+
+.ablog-cloud li a:visited:hover {
+    background: var(--visited-color);
+    color: #fff;
+}
+
+/* Font size classes generated by ablog tagcloud (1-5 scale) */
+.ablog-cloud-1 a { font-size: 0.8rem; opacity: 0.7; }
+.ablog-cloud-2 a { font-size: 0.95rem; opacity: 0.8; }
+.ablog-cloud-3 a { font-size: 1.1rem; opacity: 0.9; }
+.ablog-cloud-4 a { font-size: 1.3rem; font-weight: 600; }
+.ablog-cloud-5 a { font-size: 1.6rem; font-weight: 700; }
+
+
+/* Tag Cloud Page - Category Layout */
+.tagcloud-page {
+    margin: 1.5rem 0;
+}
+
+.tagcloud-categories h3 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 1.5rem 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tagcloud-categories h3:first-child {
+    margin-top: 0;
+}
+
+.tagcloud-categories h3 i {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+}
+
+.tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.tag-group .postcard-tag {
+    padding: 0.3rem 0.7rem;
+}
+
+.tag-group .tag-lg {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+}
+
+.tag-group .tag-md {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.tag-group .tag-sm {
+    font-size: 0.8rem;
+}
+
+
+/* Profile Skills List */
+.profile-skills {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.profile-skills li {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: var(--primary-light);
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-md);
+}
+
+.profile-skills li i {
+    margin-right: 0.3rem;
+    color: var(--primary-color);
+}
+
+
+/* =========================================
+   13. Reduced Motion Support
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .ogp-card:hover,
+    .premium-card:hover,
+    .share-button:hover,
+    .theme-toggle:hover,
+    ul.ablog-cloud li a:hover,
+    ul.ablog-post-info a.reference.internal:hover,
+    .postcard-tag:hover {
+        transform: none !important;
     }
 }
