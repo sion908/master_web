@@ -1,25 +1,24 @@
 {%- if post -%}
-<li class="ablog-post">
-  <p class="ablog-post-title">
-    <a href="{{ pathto(post.docname) }}">{{ post.title }}</a>
-  </p>
-  {%- if post.date -%}
-  <p class="ablog-post-date">
-    <small>{{ post.date.strftime(date_format) }}</small>
-  </p>
-  {%- endif -%}
-  {%- if post.description -%}
-  <p class="ablog-post-excerpt">
-    {{ post.description }}
+<li class="ablog-post postcard-item">
+  <div class="postcard-header">
+    <a href="{{ pathto(post.docname) }}" class="postcard-title">{{ post.title }}</a>
+    {%- if post.date -%}
+    <time class="postcard-date" datetime="{{ post.date.strftime('%Y-%m-%d') }}">
+      <i class="fas fa-calendar-alt"></i> {{ post.date.strftime(date_format) }}
+    </time>
+    {%- endif -%}
+  </div>
+  {%- if post.excerpt -%}
+  <p class="postcard-excerpt">
+    {{ post.excerpt|striptags|truncate(120, True, '…') }}
   </p>
   {%- endif -%}
   {%- if post.tags -%}
-  <p class="ablog-post-info">
+  <div class="postcard-tags">
     {%- for tag in post.tags -%}
-    <a href="{{ pathto(tag.docname) }}">{{ tag }}</a>
-    {%- if not loop.last -%} · {%- endif -%}
+    <a href="{{ pathto(tag.docname) }}" class="postcard-tag">{{ tag }}</a>
     {%- endfor -%}
-  </p>
+  </div>
   {%- endif -%}
 </li>
 {%- endif -%}

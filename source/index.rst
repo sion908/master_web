@@ -1,7 +1,35 @@
 Python、Web開発、クラウド技術
-================
+==============================
 
 .. raw:: html
+
+   <section class="premium-card latest-posts">
+       <div class="card-content">
+           <h3>最新記事</h3>
+           <p>技術トレンドから実践的なノウハウまで</p>
+
+.. postlist:: 10
+   :date: %Y-%m-%d
+   :format: {title} - {date}
+   :list-style: disc
+   :tags:
+   :excerpts:
+
+.. raw:: html
+
+       </div>
+   </section>
+
+   <div class="cta-section">
+       <a href="blog/archive.html" class="btn btn-primary">
+           <i class="fas fa-arrow-right"></i>
+           すべての記事を見る
+       </a>
+       <a href="tags.html" class="btn btn-outline">
+           <i class="fas fa-tags"></i>
+           タグクラウドで探す
+       </a>
+   </div>
 
    <div class="main-sections">
        <!-- Profile Section -->
@@ -11,7 +39,12 @@ Python、Web開発、クラウド技術
                    <i class="fas fa-user-circle"></i>
                    <h3>About Me</h3>
                </div>
-               <p>Webやインフラ領域を中心とするソフトウェアエンジニアです。<br>個人でWebサービスの企画・開発・運営を行っています。</p>
+               <p>長崎を拠点に活動するバックエンドエンジニアです。<br>AWSサーバレス構成を中心としたWebアプリケーションの開発・運用を本業としつつ、個人でもWebサービスの企画・開発・運営や地域コミュニティの技術支援に取り組んでいます。</p>
+               <ul class="profile-skills">
+                   <li><i class="fas fa-code"></i> Python / AWS / TypeScript</li>
+                   <li><i class="fas fa-server"></i> サーバレス / Lambda / Docker</li>
+                   <li><i class="fas fa-users"></i> JAWS-UG長崎 運営</li>
+               </ul>
                <a href="https://portfolio.sion908.tech/" class="btn btn-outline">
                    <i class="fas fa-external-link-alt"></i>
                    実績・経歴（ポートフォリオ）を見る
@@ -47,39 +80,13 @@ Python、Web開発、クラウド技術
        </section>
    </div>
 
-   <section class="premium-card latest-posts">
-       <div class="card-content">
-           <h3>最新記事</h3>
-           <p>技術トレンドから実践的なノウハウまで</p>
-
-.. postlist:: 5
-   :date: %Y-%m-%d
-   :format: {title} - {date}
-   :list-style: disc
-   :tags:
-
-.. raw:: html
-
-       </div>
-   </section>
-
-   <div class="cta-section">
-       <a href="blog/archive.html" class="btn btn-primary">
-           <i class="fas fa-arrow-right"></i>
-           すべての記事を見る
-       </a>
-       <a href="blog/tag.html" class="btn btn-outline">
-           <i class="fas fa-tags"></i>
-           タグで探す
-       </a>
-   </div>
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
    :hidden:
 
    blog
+   tags
    nagasaki-tech-calendar
    contact
    privacy
