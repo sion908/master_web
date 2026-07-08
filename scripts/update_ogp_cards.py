@@ -7,8 +7,38 @@ import re
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
+from html.parser import HTMLParser
 import requests
-from bs4 import BeautifulSoup
+
+
+class _OGPHTMLParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.title = ""
+        self._in_title = False
+        self.meta = {}
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "title":
+            self._in_title = True
+            return
+
+        if tag != "meta":
+            return
+
+        attrs_dict = dict(attrs)
+        key = attrs_dict.get("property") or attrs_dict.get("name")
+        content = attrs_dict.get("content")
+        if key and content:
+            self.meta[key] = content
+
+    def handle_endtag(self, tag):
+        if tag == "title":
+            self._in_title = False
+
+    def handle_data(self, data):
+        if self._in_title:
+            self.title += data
 
 
 def fetch_ogp(url):
@@ -20,30 +50,18 @@ def fetch_ogp(url):
         response = requests.get(url, timeout=10, headers=headers)
         response.raise_for_status()
         response.encoding = response.apparent_encoding
-        soup = BeautifulSoup(response.text, 'html.parser')
 
-        # OGP情報を取得
-        og_title = None
-        og_description = None
-        og_image = None
-        og_site_name = None
+        parser = _OGPHTMLParser()
+        parser.feed(response.text)
+        parser.close()
 
-        # metaタグを検索
-        for meta in soup.find_all('meta'):
-            property_attr = meta.get('property') or meta.get('name')
-            if property_attr == 'og:title':
-                og_title = meta.get('content')
-            elif property_attr == 'og:description':
-                og_description = meta.get('content')
-            elif property_attr == 'og:image':
-                og_image = meta.get('content')
-            elif property_attr == 'og:site_name':
-                og_site_name = meta.get('content')
-            elif property_attr == 'description':
-                og_description = og_description or meta.get('content')
+        og_title = parser.meta.get('og:title')
+        og_description = parser.meta.get('og:description') or parser.meta.get('description')
+        og_image = parser.meta.get('og:image')
+        og_site_name = parser.meta.get('og:site_name')
 
         # フォールバック
-        title = og_title or (soup.title.string if soup.title else url)
+        title = og_title or (parser.title.strip() if parser.title.strip() else url)
         description = og_description or ''
         image = og_image or ''
         site_name = og_site_name or urlparse(url).netloc

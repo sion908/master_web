@@ -164,6 +164,8 @@ fontawesome = {
 import docutils.nodes
 import sphinxext.opengraph._description_parser as ogp_desc
 import sphinxext.opengraph as ogp_init
+import sphinx_sitemap
+from queue import Queue
 
 original_get_desc = ogp_desc.get_description
 
@@ -178,6 +180,17 @@ def custom_get_description(doctree, length, known_titles):
 # モジュールの参照とその利用元の両方を置き換える
 ogp_desc.get_description = custom_get_description
 ogp_init.get_description = custom_get_description
+
+
+def _safe_record_builder_type(app):
+    builder = getattr(app, "builder", None)
+    if builder is None:
+        return
+    builder.env.is_directory_builder = type(builder).__name__ == "DirectoryHTMLBuilder"
+    builder.env.app.sitemap_links = Queue()
+
+
+sphinx_sitemap.record_builder_type = _safe_record_builder_type
 
 
 def setup(app):
