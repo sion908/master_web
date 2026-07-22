@@ -2,7 +2,7 @@
 ========================================================================
 
 .. post:: 2025-12-18
-   :tags: Python, jinja2, サーバーサイドレンダリング, Mangum, Litestar
+   :tags: Python, jinja2, サーバーサイドレンダリング, Mangum, litestar
    :author: sion908
    :language: ja
    :location: blog/2025

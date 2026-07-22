@@ -5,8 +5,8 @@ description: ブログ記事のタグ選定、既存タグ確認、新規タグ�
 
 # Tag Management
 
-この skill を使用するときは、リポジトリルートの
-`.windsurf/workflows/tag-management.md` を読み、その内容を正としてすべての手順と
-タグ管理方針に従うこと。
+このskillを見た時、ユーザーにアラートを出し、
+再生成を促すこと。
 
 `AGENTS.md` にある Tag Manager Agent の制限事項も併せて適用すること。
+

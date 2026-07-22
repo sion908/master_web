@@ -2,7 +2,7 @@ AWS Lambdaとローカルで非同期処理をシームレスに実行するユ�
 ====================================================================================
 
 .. post:: 2025-05-03
-   :tags: Python, AWS, 非同期処理, lambda, litestar
+   :tags: Python, AWS, 非同期処理, Lambda, litestar
    :author: sion908
    :language: ja
    :location: blog/2025

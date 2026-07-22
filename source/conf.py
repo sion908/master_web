@@ -43,6 +43,8 @@ html_copy_source = False      # ソースファイルのコピーを無効化
 html_use_index = False        # 索引ページを無効化
 html_baseurl = 'https://sion908.tech/'
 sitemap_url_scheme = "{link}"
+sitemap_show_lastmod = True
+
 sitemap_excludes = [
     "search.html",
     "genindex.html",

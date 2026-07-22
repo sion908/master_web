@@ -2,7 +2,7 @@ python+sqlalchemy+lambdaで管理者画面を作る
 ==========================================
 
 .. post:: 2024-12-20
-   :tags: Python, sqlalchemy, lambda, 管理者画面, sqladmin
+   :tags: Python, sqlalchemy, Lambda, 管理者画面, sqladmin
    :author: sion908
    :language: ja
    :location: blog/2024
