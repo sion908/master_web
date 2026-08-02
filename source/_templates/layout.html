@@ -19,13 +19,14 @@
 
     <!-- Structured Data (JSON-LD) for Blog Posts -->
     {% if pagename and pagename.startswith('blog/') and not pagename.endswith('archive') and not pagename.endswith('tag') %}
+    {% set article_url = pageurl if pageurl else ('https://sion908.tech/' + pagename + '.html') %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
       "headline": "{{ title if title else doc.title if doc else '' }}",
-      "url": "{{ page_url if page_url else '' }}",
-      "datePublished": "{{ doc.date if doc else '' }}",
+      "url": "{{ article_url }}",
+      "datePublished": "{{ ablog[pagename].date.strftime('%Y-%m-%d') if pagename in ablog and ablog[pagename].date else '' }}",
       "author": {
         "@type": "Person",
         "name": "{{ author if author else 'sion908' }}"
@@ -80,7 +81,7 @@
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Sion908 Blog",
+      "name": "sion908 lab Blog",
       "url": "https://sion908.tech/",
       "description": "Sion908の技術ブログ。Python、Web開発、クラウド技術などの記事を公開しています。",
       "author": {
@@ -160,10 +161,12 @@
            <div class="header-actions">
                <nav class="nav-links" id="nav-links">
                    <a href="{{ pathto(master_doc) }}" class="nav-link"><i class="fas fa-home"></i><span>ホーム</span></a>
-                   <a href="https://portfolio.sion908.tech/" class="nav-link"><i class="fas fa-briefcase"></i><span>実績</span></a>
+                   <a href="{{ pathto('blog') }}" class="nav-link"><i class="fas fa-newspaper"></i><span>ブログ</span></a>
+                   <a href="https://portfolio.sion908.tech/" class="nav-link"><i class="fas fa-briefcase"></i><span>ポートフォリオ</span></a>
                    <a href="https://www.mamekoko.sion908.tech/" class="nav-link"><i class="fas fa-book"></i><span>まめここ</span></a>
                    <a href="https://slide.sion908.tech/" class="nav-link"><i class="fas fa-presentation"></i><span>スライド</span></a>
                    <a href="{{ pathto('nagasaki-tech-calendar') }}" class="nav-link"><i class="fas fa-calendar-alt"></i><span>カレンダー</span></a>
+                   <a href="{{ pathto('contact') }}" class="nav-link"><i class="fas fa-envelope"></i><span>お問い合わせ</span></a>
                </nav>
                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
                    <i class="fas fa-sun icon-sun"></i>
@@ -353,10 +356,10 @@
                <a href="{{ pathto('contact') }}">お問い合わせ</a>
            </div>
            <div class="footer-social">
-               <a href="https://twitter.com/sion908" target="_blank" aria-label="Twitter">
+               <a href="https://twitter.com/sion908" target="_blank" rel="noopener" aria-label="X">
                    <i class="fab fa-twitter"></i>
                </a>
-               <a href="https://github.com/sion908" target="_blank" aria-label="GitHub">
+               <a href="https://github.com/sion908" target="_blank" rel="noopener" aria-label="GitHub">
                    <i class="fab fa-github"></i>
                </a>
            </div>

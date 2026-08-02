@@ -63,7 +63,7 @@ Python、Web開発、クラウド技術
 .. raw:: html
 
                        <div class="cta-section">
-                           <a href="blog/archive.html" class="btn btn-primary">
+                           <a href="blog.html" class="btn btn-primary">
                                <i class="fas fa-arrow-right"></i>
                                すべての記事を見る
                            </a>

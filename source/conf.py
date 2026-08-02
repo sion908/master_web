@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'sion908 lab Blog'
+project = 'sion908 lab'
 copyright = '2026, sion908 lab'
 author = 'sion908'
 
@@ -34,6 +34,7 @@ language = 'ja'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'default'
+html_title = 'sion908 lab Blog'
 html_static_path = ['_static']
 html_extra_path = ['_extra']
 
@@ -62,13 +63,13 @@ sitemap_excludes = [
 ]
 
 # Ablog configuration
-blog_title = 'Sion908 Blog'
+blog_title = 'sion908 lab Blog'
 blog_baseurl = 'https://sion908.tech/blog'
 blog_feed_fulltext = True
 blog_feed_subtitle = 'Technical blog by Sion908'
 blog_default_author = 'sion908'
 blog_authors = {
-    'sion908': ('https://sion908.tech', 'sionn908@gmail.com'),
+    'sion908': ('sion908', 'sionn908@gmail.com'),
 }
 blog_tagcloud = True
 
