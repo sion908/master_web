@@ -1,0 +1,3 @@
+[submodule ".agents/skills/connpass"]
+	path = .agents/skills/connpass
+	url = https://github.com/sion908/connpass-agent-skill.git

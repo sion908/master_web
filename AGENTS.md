@@ -26,6 +26,12 @@ AI生成にありがちな定型表現や不自然な文章構造を検出し、
 *   **適用タイミング:** ブログ記事（`source/blog/**/*.rst`）を執筆・公開・編集する際、またはSEO改善を行う際。
 *   **関連スキル:** [.agents/skills/seo-management/SKILL.md](file:///Users/slep/Documents/myself/sion908_master/sion908/.agents/skills/seo-management/SKILL.md)
 
+### 🎫 Connpass Event Manager (Connpassイベント連携)
+connpass API (v2) を使用してイベント情報やグループの開催履歴を取得し、イベントレポートや告知の下書き作成を支援します。
+*   **適用タイミング:** connpassのイベント情報やグループ開催履歴の取得、イベント参加/開催レポートの下書きを作成する際。
+*   **関連スキル:** [.agents/skills/connpass/SKILL.md](file:///Users/slep/Documents/myself/sion908_master/sion908/.agents/skills/connpass/SKILL.md)
+*   **セキュリティルール:** APIトークンはプロンプト、ログ、コミットメッセージ、生成ファイル等に出力・記載しないこと。
+
 ---
 
 ## 2. スキルの実行ルール

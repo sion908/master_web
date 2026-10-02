@@ -638,9 +638,11 @@ div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6 {
 /* シェアボタン・OGPカード等は除外 */
 .main-content .share-button::after,
 .main-content .ogp-card::after,
+.main-content a.ogp-card::after,
+.main-content a.ogp-card[href^="http"]::after,
 .main-content .btn-outline::after,
 .main-content .btn-primary::after {
-    content: none;
+    content: none !important;
 }
 .main-content iframe {
     max-width: 100%;
@@ -1214,53 +1216,83 @@ ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
 /* =========================================
    11. OGP Card Styles
    ========================================= */
-.ogp-card {
+.ogp-card,
+a.ogp-card,
+a.ogp-card:visited {
     display: block;
-    text-decoration: none;
+    text-decoration: none !important;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     overflow: hidden;
-    transition: box-shadow var(--transition-speed) ease, transform var(--transition-speed) ease;
+    transition: box-shadow var(--transition-speed) ease, transform var(--transition-speed) ease, border-color var(--transition-speed) ease;
     margin: 1.5rem 0;
     max-width: 100%;
+    background-color: var(--bg-card);
+    color: var(--text-primary) !important;
 }
-.ogp-card:hover {
+.ogp-card::after,
+a.ogp-card::after {
+    content: none !important;
+    display: none !important;
+}
+.ogp-card:hover,
+a.ogp-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+    border-color: var(--primary-color);
+    text-decoration: none !important;
+    filter: none !important;
 }
 .ogp-card-content {
     display: flex;
-    flex-direction: column;
-}
-@media (min-width: 640px) {
-    .ogp-card-content {
-        flex-direction: row;
-    }
+    flex-direction: row;
+    align-items: stretch;
+    background-color: var(--bg-card);
 }
 .ogp-card-image {
-    width: 100%;
-    height: 140px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    width: 120px;
+    min-height: 120px;
+    background: var(--bg-body);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    border-right: 1px solid var(--border-color);
 }
 @media (min-width: 640px) {
     .ogp-card-image {
-        width: 180px;
-        height: auto;
+        width: 140px;
+        min-height: 140px;
     }
 }
 .ogp-card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+}
+.ogp-card-image.is-contain,
+.ogp-card-image img.fit-contain {
+    background: #f8fafc;
+}
+.ogp-card-image img.fit-contain {
+    object-fit: contain;
+    padding: 6px;
+}
+[data-theme='dark'] .ogp-card-image.is-contain,
+[data-theme='dark'] .ogp-card-image img.fit-contain {
+    background: #0f172a;
 }
 .ogp-card-info {
-    padding: 1rem;
+    padding: 0.875rem 1.25rem;
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--bg-card);
 }
 .ogp-card-site {
     font-size: 0.75rem;
@@ -1268,24 +1300,31 @@ ul.ablog-cloud li a.tag-10 { font-size: 1.25rem; }
     margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    font-weight: 500;
 }
 .ogp-card-title {
     font-weight: 600;
     font-size: 0.95rem;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    transition: color var(--transition-speed) ease;
+}
+.ogp-card:hover .ogp-card-title,
+a.ogp-card:hover .ogp-card-title {
+    color: var(--primary-color);
 }
 .ogp-card-description {
     color: var(--text-secondary);
     font-size: 0.85rem;
     line-height: 1.5;
+    white-space: pre-line;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

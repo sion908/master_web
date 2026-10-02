@@ -48,6 +48,7 @@ class OGPCardDirective(Directive):
         'description': directives.unchanged,
         'image': directives.unchanged,
         'site_name': directives.unchanged,
+        'image_fit': directives.unchanged,
     }
 
     def run(self):
@@ -55,11 +56,14 @@ class OGPCardDirective(Directive):
 
         # オプションでOGP情報が指定されている場合はそれを使用
         if self.options:
+            desc = self.options.get('description') or ''
+            desc = desc.replace('\\n', '\n')
             ogp_data = {
                 'title': self.options.get('title') or url,
-                'description': self.options.get('description') or '',
+                'description': desc,
                 'image': self.options.get('image') or '',
                 'site_name': self.options.get('site_name') or urlparse(url).netloc,
+                'image_fit': self.options.get('image_fit') or 'cover',
                 'url': url
             }
         else:
@@ -124,9 +128,12 @@ class OGPCardDirective(Directive):
         """OGPカードのHTMLを生成"""
         image_html = ''
         if ogp_data['image']:
+            fit = ogp_data.get('image_fit', 'cover')
+            fit_class = ' fit-contain' if fit == 'contain' else ''
+            container_fit_class = ' is-contain' if fit == 'contain' else ''
             image_html = f'''
-            <div class="ogp-card-image">
-                <img src="{ogp_data['image']}" alt="{ogp_data['title']}" loading="lazy">
+            <div class="ogp-card-image{container_fit_class}">
+                <img src="{ogp_data['image']}" alt="{ogp_data['title']}" class="{fit_class.strip()}" loading="lazy">
             </div>'''
 
         description = ogp_data['description'][:200] + '...' if len(ogp_data['description']) > 200 else ogp_data['description']
