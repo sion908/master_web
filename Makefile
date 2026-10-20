@@ -4,7 +4,11 @@
 # You can set these variables from the command line, and also
 # from the environment for the first two.
 SPHINXOPTS    ?=
+ifeq ($(shell which uv >/dev/null 2>&1 && test -d .venv && echo 1),1)
 SPHINXBUILD   ?= uv run sphinx-build
+else
+SPHINXBUILD   ?= sphinx-build
+endif
 SOURCEDIR     = source
 BUILDDIR      = build
 
