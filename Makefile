@@ -4,7 +4,7 @@
 # You can set these variables from the command line, and also
 # from the environment for the first two.
 SPHINXOPTS    ?=
-SPHINXBUILD   ?= sphinx-build
+SPHINXBUILD   ?= uv run sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
@@ -29,7 +29,7 @@ clean:
 	@echo "Cleaned build directory."
 
 serve:
-	@cd $(BUILDDIR)/html && python -m http.server 8080
+	@cd $(BUILDDIR)/html && python3 -m http.server 8080
 	@echo "Server started at http://localhost:8080"
 
 dev: html serve
