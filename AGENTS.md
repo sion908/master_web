@@ -32,6 +32,11 @@ connpass API (v2) を使用してイベント情報やグループの開催履�
 *   **関連スキル:** [.agents/skills/connpass/SKILL.md](file:///Users/slep/Documents/script/sion908_master/sion908/.agents/skills/connpass/SKILL.md)
 *   **セキュリティルール:** APIトークンはプロンプト、ログ、コミットメッセージ、生成ファイル等に出力・記載しないこと。
 
+### 📄 pfpdf (Markdown PDF作成)
+`@pfnet-research/pfpdf` で Markdown から PDF を作成し、文書ごとにデザインや表紙・目次などを調整します。
+*   **適用タイミング:** pfpdf を使った PDF の作成・再生成・組版調整を行う際。
+*   **関連スキル:** [.agents/skills/pfpdf/SKILL.md](.agents/skills/pfpdf/SKILL.md)
+
 ---
 
 ## 2. スキルの実行ルール

@@ -100,6 +100,12 @@ Python、Web開発、クラウド技術
                                <p>長崎県内の技術イベントを集約した公開カレンダー</p>
                                <a href="nagasaki-tech-calendar.html">View Calendar</a>
                            </div>
+                           <div class="service-item">
+                               <i class="fas fa-qrcode"></i>
+                               <h4>X投稿QRメーカー</h4>
+                               <p>イベント登壇やスライド用のX投稿QRコード作成ツール</p>
+                               <a href="tweet-qr.html">Create QR</a>
+                           </div>
                        </div>
                    </div>
                </section>
@@ -117,5 +123,6 @@ Python、Web開発、クラウド技術
    blog
    tags
    nagasaki-tech-calendar
+   tweet-qr
    contact
    privacy
