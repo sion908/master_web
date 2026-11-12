@@ -1,0 +1,244 @@
+/* article_blocks: サイトの色と枠に合わせる。記事カード全体のテーマは替えない。 */
+
+.ablock-ui {
+    margin: 0.25rem 0 1.75rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ablock-ui-label {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.ablock-ui a {
+    display: inline;
+    margin-right: 0.9rem;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    text-decoration: none;
+}
+
+.ablock-ui a:hover,
+.ablock-ui a.is-active {
+    color: var(--primary-color);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+}
+
+.ablock-lead p {
+    color: var(--text-secondary);
+}
+
+.ablock-stat {
+    font-weight: 650;
+}
+
+.ablock-tldr {
+    margin: 0.25rem 0 1.25rem;
+    padding: 0.2rem 0 0.2rem 1rem;
+    border-left: 3px solid var(--primary-color);
+}
+
+.ablock-tldr ol {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.ablock-tldr li {
+    margin: 0 0 0.55rem;
+}
+
+.ablock-tldr li p {
+    margin: 0;
+}
+
+.ablock-cards {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0.4rem 0 1rem;
+}
+
+.ablock-cards-2 {
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 760px) {
+    .ablock-cards-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.ablock-card,
+.ablock-col,
+.ablock-notes,
+.ablock-definition,
+.ablock-callout,
+.ablock-principle {
+    box-sizing: border-box;
+}
+
+.ablock-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem 0.35rem;
+    background: var(--bg-body);
+}
+
+.ablock-card-title,
+article.main-content .ablock h3 {
+    margin: 0 0 0.4rem !important;
+    padding: 0 !important;
+    border: none !important;
+    font-size: 1.05rem !important;
+    line-height: 1.45 !important;
+}
+
+article.main-content .ablock-card p:last-child,
+article.main-content .ablock-step p,
+article.main-content .ablock-col dd p,
+article.main-content .ablock-tldr li p {
+    margin-bottom: 0.65rem;
+}
+
+.ablock-callout {
+    margin: 1rem 0;
+    padding: 0.15rem 0 0.15rem 1rem;
+    border-left: 3px solid var(--secondary-color);
+}
+
+.ablock-definition {
+    margin: 0.6rem 0 1rem;
+    padding: 0.9rem 1rem 0.35rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-body);
+}
+
+.ablock-definition-lead {
+    font-weight: 650;
+    line-height: 1.6;
+}
+
+.ablock-compare {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0.8rem 0 1rem;
+}
+
+@media (min-width: 760px) {
+    .ablock-compare {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.ablock-col {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    background: var(--bg-body);
+}
+
+.ablock-who {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.ablock-col dl {
+    margin: 0.6rem 0 0;
+}
+
+.ablock-col dt {
+    margin: 0.55rem 0 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.ablock-col dd {
+    margin: 0.1rem 0 0;
+}
+
+.ablock-principle {
+    margin: 0 0 1.1rem;
+    padding: 0;
+}
+
+.ablock-principle-head {
+    display: block;
+}
+
+.ablock-principle-num {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+.ablock-principle-num::before {
+    content: "";
+}
+
+.ablock-one-line {
+    font-weight: 650;
+}
+
+.ablock-more {
+    margin: 0.4rem 0 0.8rem;
+}
+
+.ablock-more summary {
+    cursor: pointer;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.ablock-more-body {
+    padding-top: 0.35rem;
+}
+
+.ablock-cycle {
+    margin: 0.4rem 0 1rem;
+    padding-left: 0.2rem;
+}
+
+.ablock-step {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    gap: 0.35rem 0.7rem;
+    margin: 0 0 0.85rem;
+}
+
+.ablock-step-num {
+    color: var(--text-muted);
+    font-weight: 650;
+}
+
+.ablock-notes {
+    margin-top: 0.4rem;
+    padding: 0.9rem 1rem 0.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-body);
+}
+
+.ablock-notes ul {
+    margin: 0;
+    padding-left: 1.15rem;
+}
+
+.ablock-notes li {
+    margin-bottom: 0.65rem;
+}
+
+article.main-content:has(.ablock) section {
+    scroll-margin-top: 6rem;
+}

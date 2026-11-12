@@ -51,6 +51,7 @@
                 <a href="blog/tag/データ分析.html" class="postcard-tag tag-sm">データ分析</a>
                 <a href="blog/tag/佐賀.html" class="postcard-tag tag-sm">佐賀</a>
                 <a href="blog/tag/行政.html" class="postcard-tag tag-sm">行政</a>
+                <a href="blog/tag/adhd.html" class="postcard-tag tag-sm">ADHD</a>
             </div>
 
             <h3><i class="fas fa-bullseye"></i> 目的/タイプ</h3>

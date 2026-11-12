@@ -23,6 +23,7 @@ extensions = [
     'ogp_card_directive',
     'sphinx_sitemap',
     'lazy_images',
+    'article_blocks',
 ]
 
 templates_path = ['_templates']
